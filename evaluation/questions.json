@@ -1,0 +1,17 @@
+[
+  {
+    "question": "What is the main difference between synchronous and asynchronous programming?",
+    "expectedConcept": "synchronous blocks execution, asynchronous allows execution to continue",
+    "expectedTimestamp": 120
+  },
+  {
+    "question": "How does the event loop work in Node.js?",
+    "expectedConcept": "call stack, callback queue, polling phase",
+    "expectedTimestamp": 345
+  },
+  {
+    "question": "What is the role of a vector database?",
+    "expectedConcept": "store and query high-dimensional embeddings for similarity search",
+    "expectedTimestamp": 45
+  }
+]

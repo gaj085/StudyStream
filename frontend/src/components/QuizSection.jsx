@@ -1,0 +1,188 @@
+import React, { useState } from 'react';
+import { HelpCircle, CheckCircle, XCircle, ArrowRight, RotateCcw, MessageSquare } from 'lucide-react';
+
+function QuizSection({ quiz, onAskTutor }) {
+  const [started, setStarted] = useState(false);
+  const [currentQIndex, setCurrentQIndex] = useState(0);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [score, setScore] = useState(0);
+  const [finished, setFinished] = useState(false);
+
+  if (!quiz || quiz.length === 0) return null;
+
+  const currentQ = quiz[currentQIndex];
+
+  const handleStart = () => {
+    setStarted(true);
+  };
+
+  const handleSelect = (opt) => {
+    if (!submitted) {
+      setSelectedOption(opt);
+    }
+  };
+
+  const handleSubmit = () => {
+    if (!selectedOption) return;
+    setSubmitted(true);
+    if (selectedOption === currentQ.correctAnswer) {
+      setScore(score + 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentQIndex < quiz.length - 1) {
+      setCurrentQIndex(currentQIndex + 1);
+      setSelectedOption(null);
+      setSubmitted(false);
+    } else {
+      setFinished(true);
+    }
+  };
+
+  const handleReset = () => {
+    setStarted(false);
+    setCurrentQIndex(0);
+    setSelectedOption(null);
+    setSubmitted(false);
+    setScore(0);
+    setFinished(false);
+  };
+
+  if (!started) {
+    return (
+      <div className="glass-panel p-8 rounded-xl border border-slate-800/85 text-center flex flex-col items-center justify-center animate-fade-in relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="w-16 h-16 rounded-2xl bg-purple-600/20 border border-purple-500/30 text-purple-400 flex items-center justify-center mb-4">
+          <HelpCircle className="w-8 h-8" />
+        </div>
+        <h3 className="text-2xl font-bold text-slate-100 mb-2">Knowledge Check</h3>
+        <p className="text-slate-400 mb-6 max-w-sm">
+          Test your understanding of the lecture with an AI-generated quiz based on the transcript.
+        </p>
+        <button
+          onClick={handleStart}
+          className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-lg shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-all transform hover:-translate-y-0.5"
+        >
+          Start Quiz
+        </button>
+      </div>
+    );
+  }
+
+  if (finished) {
+    return (
+      <div className="glass-panel p-8 rounded-xl border border-slate-800/85 text-center animate-fade-in">
+        <p className="text-xs font-bold uppercase tracking-widest text-purple-400 mb-2">Knowledge Check Complete</p>
+        <div className="text-6xl font-extrabold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent my-6">
+          {score} / {quiz.length}
+        </div>
+        <p className="text-sm text-slate-400 mb-8">
+          {score === quiz.length
+            ? 'Perfect score! You mastered this lecture.'
+            : score >= Math.ceil(quiz.length / 2)
+            ? 'Good work! Review the ones you missed with the AI Tutor.'
+            : 'Keep going — ask the AI Tutor to explain the concepts you found tricky.'}
+        </p>
+        <div className="flex flex-col sm:flex-row justify-center gap-4">
+          <button
+            onClick={handleReset}
+            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors border border-slate-700 hover:border-slate-600"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Review Answers
+          </button>
+          <button
+            onClick={() => onAskTutor("I need help understanding some concepts from the quiz.")}
+            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-blue-500/20"
+          >
+            <MessageSquare className="w-4 h-4" />
+            Ask AI Tutor
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const isCorrect = selectedOption === currentQ.correctAnswer;
+
+  return (
+    <div className="glass-panel p-6 md:p-8 rounded-xl border border-slate-800/85 animate-fade-in flex flex-col min-h-[400px]">
+      <div className="flex justify-between items-center mb-6">
+        <span className="text-xs font-bold uppercase tracking-wider text-purple-400">
+          Question {currentQIndex + 1} of {quiz.length}
+        </span>
+        <span className="text-xs font-medium text-slate-500 bg-slate-900 px-2 py-1 rounded-md border border-slate-800">
+          Score: {score}
+        </span>
+      </div>
+
+      <h4 className="text-lg md:text-xl font-semibold text-slate-100 mb-6 leading-relaxed">
+        {currentQ.question}
+      </h4>
+
+      <div className="space-y-3 flex-grow">
+        {currentQ.options.map((opt, i) => {
+          let style = "bg-slate-900/50 border-slate-800 hover:border-purple-500/50 hover:bg-slate-800/80 text-slate-300";
+          if (submitted) {
+            if (opt === currentQ.correctAnswer) {
+              style = "bg-emerald-900/20 border-emerald-500/50 text-emerald-200";
+            } else if (opt === selectedOption && !isCorrect) {
+              style = "bg-rose-900/20 border-rose-500/50 text-rose-200";
+            } else {
+              style = "bg-slate-900/30 border-slate-800/50 text-slate-500 opacity-50";
+            }
+          } else if (opt === selectedOption) {
+            style = "bg-purple-900/40 border-purple-500 text-purple-100 shadow-[0_0_10px_rgba(168,85,247,0.2)]";
+          }
+
+          return (
+            <button
+              key={i}
+              onClick={() => handleSelect(opt)}
+              disabled={submitted}
+              className={`w-full text-left p-4 rounded-xl border transition-all duration-200 flex items-center justify-between ${style}`}
+            >
+              <span className="text-sm md:text-base pr-4">{opt}</span>
+              {submitted && opt === currentQ.correctAnswer && <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />}
+              {submitted && opt === selectedOption && !isCorrect && <XCircle className="w-5 h-5 text-rose-400 shrink-0" />}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-6 pt-6 border-t border-slate-800/80">
+        {!submitted ? (
+          <button
+            onClick={handleSubmit}
+            disabled={!selectedOption}
+            className="w-full py-3 bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 disabled:text-slate-500 text-white font-semibold rounded-lg transition-all"
+          >
+            Submit Answer
+          </button>
+        ) : (
+          <div className="animate-fade-in-up">
+            <div className={`p-4 rounded-lg mb-4 border ${isCorrect ? 'bg-emerald-950/30 border-emerald-900/50' : 'bg-rose-950/30 border-rose-900/50'}`}>
+              <p className="text-sm">
+                <span className={`font-bold mr-2 ${isCorrect ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {isCorrect ? 'Correct!' : 'Incorrect.'}
+                </span>
+                <span className="text-slate-300">{currentQ.explanation}</span>
+              </p>
+            </div>
+            <button
+              onClick={handleNext}
+              className="w-full py-3 flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg transition-all border border-slate-700 hover:border-slate-600"
+            >
+              {currentQIndex < quiz.length - 1 ? 'Next Question' : 'View Results'}
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default QuizSection;

@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-100 min-h-screen overflow-x-hidden selection:bg-blue-600/30 selection:text-blue-200;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-800/80 rounded-full hover:bg-slate-700/80;
+}
+
+/* Glassmorphism card */
+.glass-panel {
+  @apply bg-slate-900/60 backdrop-blur-md border border-slate-800/60 shadow-xl shadow-black/20;
+}
+
+.glass-panel-glow {
+  @apply bg-slate-900/70 backdrop-blur-lg border border-slate-800/80 shadow-2xl shadow-blue-500/5;
+}
+
+/* Custom Grid Background */
+.bg-grid {
+  background-image: 
+    radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.12), transparent 50%),
+    radial-gradient(circle at 10% 40%, rgba(139, 92, 246, 0.05), transparent 45%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+}
+
+/* Custom animations for background blobs */
+@keyframes pulseGlow {
+  0%, 100% {
+    transform: scale(1) translate(0px, 0px);
+    opacity: 0.2;
+  }
+  33% {
+    transform: scale(1.1) translate(30px, -50px);
+    opacity: 0.35;
+  }
+  66% {
+    transform: scale(0.9) translate(-20px, 20px);
+    opacity: 0.25;
+  }
+}
+
+.animate-glow-1 {
+  animation: pulseGlow 15s infinite alternate ease-in-out;
+}
+
+.animate-glow-2 {
+  animation: pulseGlow 20s infinite alternate-reverse ease-in-out;
+}
+
+/* Glow Border Focus */
+.glow-focus {
+  @apply transition-all duration-300 focus:border-blue-500/80 focus:ring-2 focus:ring-blue-500/20 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)];
+}
