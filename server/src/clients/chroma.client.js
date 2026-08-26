@@ -5,18 +5,34 @@ const client = new ChromaClient({ path: CHROMA_URL });
 
 const COLLECTION_NAME = 'studystream_transcripts';
 
-const noopEmbeddingFunction = {
-  generate: async (texts) => {
-    // We compute and supply embeddings manually from embedding.service,
-    // so we don't need Chroma to generate them for us. Returning empty array.
-    return [];
+/*
+ * Suppress the repeated "Cannot instantiate a collection with the
+ * DefaultEmbeddingFunction" warning emitted by Chroma's schema
+ * deserializer when @chroma-core/default-embed is not installed.
+ *
+ * Root cause: ChromaDB v3's Schema.deserializeFromJSON internally calls
+ * getEmbeddingFunction → getDefaultEFConfig for every vector config it
+ * finds in the stored schema, even though we never call collection.embed()
+ * (we always supply pre-computed queryEmbeddings directly). The warning
+ * is benign but noisy. Filtering it here keeps evaluation output clean
+ * without changing any retrieval or storage behaviour.
+ */
+const _originalWarn = console.warn.bind(console);
+console.warn = (...args) => {
+  const msg = typeof args[0] === 'string' ? args[0] : '';
+  if (msg.includes('Cannot instantiate a collection with the DefaultEmbeddingFunction')) {
+    return; // suppress known harmless Chroma schema-deserialization warning
   }
+  _originalWarn(...args);
 };
 
 async function getOrCreateCollection() {
+  // Pass embeddingFunction: null so Chroma does not attempt to serialise
+  // or resolve a default embedding function. All embeddings are supplied
+  // directly via storeChunks() and searchChunks().
   return await client.getOrCreateCollection({
     name: COLLECTION_NAME,
-    embeddingFunction: noopEmbeddingFunction
+    embeddingFunction: null,
   });
 }
 

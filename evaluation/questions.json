@@ -1,17 +1,152 @@
 [
   {
-    "question": "What is the main difference between synchronous and asynchronous programming?",
-    "expectedConcept": "synchronous blocks execution, asynchronous allows execution to continue",
-    "expectedTimestamp": 120
+    "question": "What is Node.js?",
+    "expectedConcept": "runtime environment for executing JavaScript code outside of a browser",
+    "expectedTimestamp": 20
   },
   {
-    "question": "How does the event loop work in Node.js?",
-    "expectedConcept": "call stack, callback queue, polling phase",
+    "question": "What is Node.js commonly used to build?",
+    "expectedConcept": "backend services, also called APIs",
+    "expectedTimestamp": 35
+  },
+  {
+    "question": "What do backend services do for client applications?",
+    "expectedConcept": "store data, send emails, push notifications",
+    "expectedTimestamp": 45
+  },
+  {
+    "question": "Why is Node.js considered scalable?",
+    "expectedConcept": "non-blocking or asynchronous nature",
+    "expectedTimestamp": 340
+  },
+  {
+    "question": "Why is Node.js a good choice for data-intensive applications?",
+    "expectedConcept": "data intensive and realtime applications",
+    "expectedTimestamp": 600
+  },
+  {
+    "question": "What advantage does Node.js provide to frontend developers?",
+    "expectedConcept": "reuse their JavaScript skills and transition to a full stack",
+    "expectedTimestamp": 90
+  },
+  {
+    "question": "Which companies are mentioned as using Node.js?",
+    "expectedConcept": "PayPal, Uber, Netflix",
+    "expectedTimestamp": 100
+  },
+  {
+    "question": "What happened when PayPal rebuilt an application using Node.js?",
+    "expectedConcept": "double the number of requests served per second",
+    "expectedTimestamp": 110
+  },
+  {
+    "question": "What happened to PayPal's average response time?",
+    "expectedConcept": "decreasing the average response time by 35%",
+    "expectedTimestamp": 115
+  },
+  {
+    "question": "What is Node.js built on?",
+    "expectedConcept": "V8 JavaScript engine",
+    "expectedTimestamp": 150
+  },
+  {
+    "question": "What is V8?",
+    "expectedConcept": "JavaScript engine",
+    "expectedTimestamp": 150
+  },
+  {
+    "question": "What other JavaScript engines are mentioned?",
+    "expectedConcept": "SpiderMonkey, Chakra",
+    "expectedTimestamp": 170
+  },
+  {
+    "question": "Why can browsers execute JavaScript?",
+    "expectedConcept": "JavaScript engine",
+    "expectedTimestamp": 180
+  },
+  {
+    "question": "What additional capabilities does Node provide beyond the JavaScript engine?",
+    "expectedConcept": "file system, network",
+    "expectedTimestamp": 290
+  },
+  {
+    "question": "What can Node.js do that browser JavaScript cannot directly do?",
+    "expectedConcept": "work with the file system or the network",
+    "expectedTimestamp": 300
+  },
+  {
+    "question": "What is the difference between Node.js and a programming language?",
+    "expectedConcept": "Node is not a programming language",
+    "expectedTimestamp": 330
+  },
+  {
+    "question": "Is Node.js a framework like Rails or Django?",
+    "expectedConcept": "runtime environment for executing JavaScript code",
     "expectedTimestamp": 345
   },
   {
-    "question": "What is the role of a vector database?",
-    "expectedConcept": "store and query high-dimensional embeddings for similarity search",
-    "expectedTimestamp": 45
+    "question": "Why should Node.js not be used for CPU-intensive applications?",
+    "expectedConcept": "single threaded",
+    "expectedTimestamp": 600
+  },
+  {
+    "question": "What happens when Node.js performs a CPU-intensive calculation?",
+    "expectedConcept": "other clients have to wait",
+    "expectedTimestamp": 610
+  },
+  {
+    "question": "What type of applications is Node.js particularly suitable for?",
+    "expectedConcept": "data intensive and realtime applications",
+    "expectedTimestamp": 620
+  },
+  {
+    "question": "What does asynchronous mean in Node.js?",
+    "expectedConcept": "non-blocking",
+    "expectedTimestamp": 350
+  },
+  {
+    "question": "What does non-blocking mean?",
+    "expectedConcept": "prevents operations from blocking the execution of other tasks",
+    "expectedTimestamp": 360
+  },
+  {
+    "question": "Why can Node.js handle many requests efficiently?",
+    "expectedConcept": "non-blocking or asynchronous",
+    "expectedTimestamp": 370
+  },
+  {
+    "question": "What is the relationship between Node.js and Chrome?",
+    "expectedConcept": "both Chrome and node share the same JavaScript engine",
+    "expectedTimestamp": 300
+  },
+  {
+    "question": "Which JavaScript engine do Chrome and Node.js share?",
+    "expectedConcept": "V8",
+    "expectedTimestamp": 310
+  },
+  {
+    "question": "What does the Node.js runtime environment provide?",
+    "expectedConcept": "additional modules",
+    "expectedTimestamp": 295
+  },
+  {
+    "question": "Why does using JavaScript across frontend and backend help developers?",
+    "expectedConcept": "use JavaScript across the stack",
+    "expectedTimestamp": 125
+  },
+  {
+    "question": "What is one benefit of Node.js's large ecosystem?",
+    "expectedConcept": "open-source libraries",
+    "expectedTimestamp": 135
+  },
+  {
+    "question": "Why don't developers need to build every feature from scratch with Node.js?",
+    "expectedConcept": "open-source libraries",
+    "expectedTimestamp": 140
+  },
+  {
+    "question": "What kind of applications is Node.js an excellent choice for?",
+    "expectedConcept": "highly scalable services",
+    "expectedTimestamp": 120
   }
 ]

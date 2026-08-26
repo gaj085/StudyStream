@@ -168,7 +168,7 @@ StudyStream/
 
 1. **Node.js-First Architecture**: The application backend is implemented entirely in Node.js. Transformers.js enables local embedding generation within the JavaScript runtime, eliminating the need for a separate Python inference service. ChromaDB runs as a separate local process, but every application-layer concern — transcription, chunking, embedding, RAG orchestration, and LLM calls — lives within a single Node.js service.
 2. **Skipping Local Whisper**: For the MVP, the system uses available YouTube captions instead of downloading and transcribing the video locally, significantly reducing processing time and infrastructure requirements.
-3. **Preserved Timestamps & Data Isolation**: The chunk text is embedded while its metadata (`videoId`, `startTime`, `endTime`, and `chunkIndex`) is stored alongside the vector in ChromaDB. This ensures retrieval is isolated to the current video and allows the backend to return clickable timestamps directly from metadata, bypassing LLM citation generation.
+3. **Preserved Timestamps & Data Isolation**: Each transcript chunk is stored with its `videoId`. Retrieval filters by the current video, and the backend validates the returned metadata before passing chunks to the LLM. Clickable timestamps are returned directly from the metadata, bypassing LLM citation generation.
    ```json
    {
      "videoId": "dQw4w9WgXcQ",
@@ -209,47 +209,60 @@ npm run dev
 ```bash
 cd StudyStream/frontend
 npm install
+```
+Start the frontend:
+```bash
 npm run dev
 ```
 Open the provided `localhost` URL in your browser.
 
 ---
 
-## 📊 Evaluation
+## 📊 RAG Evaluation
 
-StudyStream includes a custom evaluation script to measure RAG performance using a ground-truth dataset.
+StudyStream includes a custom retrieval evaluation set containing 30 transcript-grounded questions.
 
-To evaluate retrieval accuracy, run:
+Each question is embedded using the same local `all-MiniLM-L6-v2` embedding model used by the application. The evaluator checks whether a relevant transcript chunk appears within the top-K ChromaDB retrieval results.
+
+| Metric | Result |
+|---|---:|
+| Recall@1 | 46.67% |
+| Recall@3 | 66.67% |
+| Recall@5 | 70.00% |
+
+These results represent retrieval recall on the current 30-question evaluation set, rather than end-to-end answer accuracy.
+
+To run the evaluation, use:
 ```bash
-node evaluation/evaluate.js
+node evaluation/evaluate.js <videoId>
 ```
+*(Requires ChromaDB to be running and a video to be processed/indexed first).*
 
-Retrieval evaluation measures whether the expected chunk/information appears in the top-1, top-3, and top-5 retrieved results from ChromaDB based on your ground-truth questions. The evaluation script also reports real retrieval latency (Chroma search + local embedding generation).
+### Evaluation Method
+
+Each evaluation question contains:
+- a natural-language question
+- an expected concept
+- an approximate transcript timestamp
+
+The evaluator:
+1. Generates an embedding for the question.
+2. Performs a top-5 similarity search in ChromaDB.
+3. Checks whether a retrieved chunk matches the expected concept.
+4. Records whether the relevant chunk appeared in the top 1, 3, or 5 results.
+5. Reports embedding and ChromaDB retrieval latency.
+
+This provides a lightweight, reproducible retrieval benchmark for the current MVP.
 
 ---
 
 ## 🔮 Limitations & Future Extensions
 
-- **Caption Availability**: Videos without available captions are not currently supported. A future version could fall back to Whisper or a transcription API (e.g. Deepgram) when YouTube captions are unavailable.
-  ```
-                YouTube
-                   │
-            ┌──────┴──────┐
-            ▼             ▼
-       Captions       No captions
-            │             │
-            │        Transcription API
-            │             │
-            └──────┬──────┘
-                   ▼
-              Transcript
-  ```
+- **Caption Dependency**: Videos without available captions are not currently supported. A future version could fall back to Whisper or a transcription API when YouTube captions are unavailable.
+- **Character-based Chunking**: Chunks are split based on raw character count rather than semantic sentence or paragraph boundaries.
+- **Ephemeral Job State**: Job status and processing metadata are maintained in memory. This keeps the MVP lightweight but means state is lost when the server restarts.
+- **Stateless Chat**: The current RAG pipeline is stateless. It does not inject previous conversation turns into the retrieval and generation context.
+- **Uncalibrated Threshold**: The relevance distance threshold (`RAG_DISTANCE_THRESHOLD`) is a heuristic value and is not dynamically calibrated across different subjects.
+- **Evaluation Scope**: The current evaluation measures retrieval recall using a 30-question custom dataset. End-to-end answer quality is not currently measured.
 - **Reranking**: Adding a cross-encoder reranking stage after vector retrieval would improve precision for complex or ambiguous queries.
-
-- **Ephemeral Job State**: Job status and processing metadata are maintained in memory. This keeps the MVP lightweight but means state is lost when the server restarts. A persistent store could be introduced for production deployments.
-
-- **Conversation History**: The current RAG pipeline is stateless. A future extension would inject previous conversation turns into the retrieval and generation context for multi-turn dialogues.
-
 - **Hybrid Retrieval**: Combining semantic vector search with keyword/BM25 retrieval would improve recall for queries where exact terminology matters.
-
-- **Evaluation Expansion**: The current evaluation script measures retrieval recall (Top-1/3/5). A fuller evaluation would also measure end-to-end answer quality using an LLM-as-judge approach.
