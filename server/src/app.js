@@ -29,6 +29,10 @@ app.use(
 app.use(express.json());
 app.use(morgan("dev"));
 
+app.get("/", (req, res) => {
+  res.send("StudyStream backend is running!");
+});
+
 // Routes
 app.use("/api/videos", videoRoutes);
 app.use("/api", healthRoutes);
