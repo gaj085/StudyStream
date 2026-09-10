@@ -15,7 +15,6 @@ yarn-error.log*
 
 # Database data folders
 chroma/
-./chroma
 *.db
 *.sqlite
 
@@ -29,8 +28,6 @@ chroma/
 *.sln
 *.sw?
 
-# Project-specific logs and evaluation temp files
+# Project-specific logs
 logs/
 *.log
-.gemini/
-evaluation/temp_results/

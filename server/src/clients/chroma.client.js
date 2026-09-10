@@ -1,22 +1,25 @@
-const { ChromaClient } = require('chromadb');
+const { CloudClient } = require("chromadb");
 
-const CHROMA_URL = process.env.CHROMA_URL || 'http://localhost:8000';
-const client = new ChromaClient({ path: CHROMA_URL });
+const client = new CloudClient({
+  apiKey: process.env.CHROMA_API_KEY,
+  tenant: process.env.CHROMA_TENANT,
+  database: process.env.CHROMA_DATABASE,
+});
 
-const COLLECTION_NAME = 'studystream_transcripts';
+const COLLECTION_NAME = "studystream_transcripts";
 
 const noopEmbeddingFunction = {
   generate: async (texts) => {
     // We compute and supply embeddings manually from embedding.service,
     // so we don't need Chroma to generate them for us. Returning empty array.
     return [];
-  }
+  },
 };
 
 async function getOrCreateCollection() {
   return await client.getOrCreateCollection({
     name: COLLECTION_NAME,
-    embeddingFunction: noopEmbeddingFunction
+    embeddingFunction: noopEmbeddingFunction,
   });
 }
 
@@ -28,8 +31,8 @@ async function storeChunks(videoId, chunks, embeddings) {
   try {
     const collection = await getOrCreateCollection();
 
-    const ids = chunks.map(c => c.chunkId);
-    const documents = chunks.map(c => c.text);
+    const ids = chunks.map((c) => c.chunkId);
+    const documents = chunks.map((c) => c.text);
     const metadatas = chunks.map((c, i) => ({
       videoId,
       chunkIndex: i,
@@ -45,9 +48,11 @@ async function storeChunks(videoId, chunks, embeddings) {
       documents,
     });
 
-    console.log(`[ChromaDB] Stored ${chunks.length} chunks for videoId=${videoId}`);
+    console.log(
+      `[ChromaDB] Stored ${chunks.length} chunks for videoId=${videoId}`,
+    );
   } catch (error) {
-    console.error('[ChromaDB] Error storing chunks:', error);
+    console.error("[ChromaDB] Error storing chunks:", error);
     throw error;
   }
 }
@@ -64,7 +69,10 @@ async function deleteChunks(videoId) {
   } catch (error) {
     // Non-fatal: if the collection has no matching docs, Chroma may throw.
     // We log and continue — the upsert will handle the rest.
-    console.warn(`[ChromaDB] deleteChunks warning (may be empty) for videoId=${videoId}:`, error.message);
+    console.warn(
+      `[ChromaDB] deleteChunks warning (may be empty) for videoId=${videoId}:`,
+      error.message,
+    );
   }
 }
 
@@ -106,7 +114,7 @@ async function searchChunks(videoId, queryEmbedding, topK = 5) {
       // This is a defence-in-depth measure against ChromaDB where-filter edge cases.
       if (!meta || meta.videoId !== videoId) {
         console.warn(
-          `[ChromaDB] Isolation guard: discarded chunk with videoId=${meta?.videoId} (expected ${videoId})`
+          `[ChromaDB] Isolation guard: discarded chunk with videoId=${meta?.videoId} (expected ${videoId})`,
         );
         continue;
       }
@@ -123,7 +131,7 @@ async function searchChunks(videoId, queryEmbedding, topK = 5) {
 
     return formattedResults;
   } catch (error) {
-    console.error('[ChromaDB] Error searching chunks:', error);
+    console.error("[ChromaDB] Error searching chunks:", error);
     throw error;
   }
 }
