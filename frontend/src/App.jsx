@@ -1,32 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import Header from './components/Header';
-import VideoInput from './components/VideoInput';
-import ProcessingPipeline from './components/ProcessingPipeline';
-import SummarySection from './components/SummarySection';
-import QuizSection from './components/QuizSection';
-import AITutor from './components/AITutor';
-import './App.css';
+import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import Header from "./components/Header";
+import VideoInput from "./components/VideoInput";
+import ProcessingPipeline from "./components/ProcessingPipeline";
+import SummarySection from "./components/SummarySection";
+import QuizSection from "./components/QuizSection";
+import AITutor from "./components/AITutor";
+import "./App.css";
 
-const API_BASE_URL = 'http://localhost:5000/api';
-
-// Animated background blobs
-function BackgroundDecoration() {
-  return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
-      <div className="absolute top-[-15%] left-[10%] w-[500px] h-[500px] rounded-full bg-blue-600 opacity-[0.07] blur-[100px] animate-glow-1" />
-      <div className="absolute bottom-[-20%] right-[5%] w-[600px] h-[600px] rounded-full bg-purple-600 opacity-[0.06] blur-[120px] animate-glow-2" />
-    </div>
-  );
-}
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
 function App() {
   // --- State ---
-  const [videoUrl, setVideoUrl] = useState('');
+  const [videoUrl, setVideoUrl] = useState("");
   const [jobId, setJobId] = useState(null);
-  const [jobStatus, setJobStatus] = useState('idle'); // idle | queued | transcribing | chunking | embedding | indexing | summarizing | ready | error
+  const [jobStatus, setJobStatus] = useState("idle"); // idle | queued | transcribing | chunking | embedding | indexing | summarizing | ready | error
   const [jobProgress, setJobProgress] = useState(0);
-  const [jobMessage, setJobMessage] = useState('');
+  const [jobMessage, setJobMessage] = useState("");
   const [jobError, setJobError] = useState(null);
 
   const [videoId, setVideoId] = useState(null);
@@ -44,11 +35,11 @@ function App() {
       eventSourceRef.current.close();
       eventSourceRef.current = null;
     }
-    setVideoUrl('');
+    setVideoUrl("");
     setJobId(null);
-    setJobStatus('idle');
+    setJobStatus("idle");
     setJobProgress(0);
-    setJobMessage('');
+    setJobMessage("");
     setJobError(null);
     setVideoId(null);
     setSummary(null);
@@ -62,7 +53,7 @@ function App() {
     if (!url.trim()) return;
     setVideoUrl(url);
     setJobError(null);
-    setJobStatus('queued');
+    setJobStatus("queued");
     setJobProgress(0);
     setSummary(null);
     setQuiz(null);
@@ -72,9 +63,11 @@ function App() {
       const res = await axios.post(`${API_BASE_URL}/videos`, { url });
       setJobId(res.data.jobId);
     } catch (err) {
-      const msg = err.response?.data?.error || 'Failed to start processing. Is the backend running?';
+      const msg =
+        err.response?.data?.error ||
+        "Failed to start processing. Is the backend running?";
       setJobError(msg);
-      setJobStatus('error');
+      setJobStatus("error");
     }
   };
 
@@ -94,26 +87,26 @@ function App() {
         const data = JSON.parse(event.data);
         setJobStatus(data.status);
         setJobProgress(data.progress || 0);
-        setJobMessage(data.message || '');
+        setJobMessage(data.message || "");
 
-        if (data.status === 'ready') {
+        if (data.status === "ready") {
           const vid = data.result?.videoId;
           setVideoId(vid);
           fetchSummaryAndQuiz(vid);
           es.close();
         }
 
-        if (data.status === 'error') {
-          setJobError(data.message || 'An error occurred during processing.');
+        if (data.status === "error") {
+          setJobError(data.message || "An error occurred during processing.");
           es.close();
         }
       } catch (e) {
-        console.error('SSE parse error:', e);
+        console.error("SSE parse error:", e);
       }
     };
 
     es.onerror = () => {
-      setJobError('Connection to server lost during processing.');
+      setJobError("Connection to server lost during processing.");
       es.close();
     };
 
@@ -141,32 +134,41 @@ function App() {
       // Save to localStorage history
       saveToHistory(videoUrl, vid, summaryRes.data?.title);
     } catch (err) {
-      console.error('Failed to fetch summary/quiz:', err);
+      console.error("Failed to fetch summary/quiz:", err);
     }
   };
 
   // --- Save analysis to localStorage history ---
   const saveToHistory = (url, vid, title) => {
     try {
-      const stored = JSON.parse(localStorage.getItem('studystream_history') || '[]');
+      const stored = JSON.parse(
+        localStorage.getItem("studystream_history") || "[]",
+      );
       const entry = { url, videoId: vid, title: title || url };
-      const filtered = stored.filter(h => h.url !== url);
+      const filtered = stored.filter((h) => h.url !== url);
       const updated = [entry, ...filtered].slice(0, 5);
-      localStorage.setItem('studystream_history', JSON.stringify(updated));
+      localStorage.setItem("studystream_history", JSON.stringify(updated));
     } catch (e) {
-      console.error('Error saving history:', e);
+      console.error("Error saving history:", e);
     }
   };
 
-  const isProcessing = ['queued', 'transcribing', 'chunking', 'embedding', 'indexing', 'summarizing'].includes(jobStatus);
-  const isReady = jobStatus === 'ready' && videoId;
-  const hasVideo = isProcessing || isReady || jobStatus === 'error';
+  const isProcessing = [
+    "queued",
+    "transcribing",
+    "chunking",
+    "embedding",
+    "indexing",
+    "summarizing",
+  ].includes(jobStatus);
+  const isReady = jobStatus === "ready" && videoId;
+  const hasVideo = isProcessing || isReady || jobStatus === "error";
 
   return (
-    <div className="min-h-screen bg-slate-950 bg-grid relative">
-      <BackgroundDecoration />
-
-      <div className={`relative z-10 flex min-h-screen transition-all duration-300 ${isReady ? 'gap-0' : ''}`}>
+    <div className="min-h-screen bg-grid relative">
+      <div
+        className={`relative z-10 flex min-h-screen transition-all duration-300 ${isReady ? "gap-0" : ""}`}
+      >
         {/* Main Content Area */}
         <div className={`flex-grow min-w-0 transition-all duration-300`}>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-24">
@@ -174,10 +176,7 @@ function App() {
 
             {/* Landing / Input */}
             {!hasVideo && (
-              <VideoInput
-                onAnalyze={handleAnalyze}
-                isLoading={false}
-              />
+              <VideoInput onAnalyze={handleAnalyze} isLoading={false} />
             )}
 
             {/* Processing Pipeline */}
@@ -190,10 +189,12 @@ function App() {
             )}
 
             {/* Error State */}
-            {jobStatus === 'error' && (
+            {jobStatus === "error" && (
               <div className="max-w-xl mx-auto mt-10 glass-panel rounded-xl border border-rose-900/50 p-8 text-center animate-fade-in">
                 <div className="text-rose-500 text-4xl mb-4">⚠</div>
-                <h3 className="text-lg font-bold text-rose-400 mb-2">Processing Failed</h3>
+                <h3 className="text-lg font-bold text-rose-400 mb-2">
+                  Processing Failed
+                </h3>
                 <p className="text-sm text-slate-400 mb-6">{jobError}</p>
                 <button
                   onClick={handleReset}
@@ -212,15 +213,21 @@ function App() {
                   <div className="flex items-center gap-3">
                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse"></div>
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-emerald-400">Video Ready</p>
-                      <p className="text-sm text-slate-300 truncate max-w-xs md:max-w-md mt-0.5">{summary?.title || videoUrl}</p>
+                      <p className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                        Ready to study
+                      </p>
+                      <p className="text-sm text-slate-300 truncate max-w-xs md:max-w-md mt-0.5">
+                        {summary?.title || videoUrl}
+                      </p>
                     </div>
                   </div>
                   <button
-                    onClick={() => { setTutorOpen(true); }}
+                    onClick={() => {
+                      setTutorOpen(true);
+                    }}
                     className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-purple-300 hover:text-purple-100 bg-purple-900/20 hover:bg-purple-900/40 border border-purple-800/40 hover:border-purple-600/60 rounded-lg transition-all"
                   >
-                    Open AI Tutor
+                    Open Tutor
                   </button>
                 </div>
 

@@ -1,17 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Video, ArrowRight, History, Play, MessageSquare, HelpCircle, Clock } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import {
+  Video,
+  ArrowRight,
+  History,
+  Play,
+  MessageSquare,
+  HelpCircle,
+  Clock,
+} from "lucide-react";
 
 function VideoInput({ onAnalyze, isLoading }) {
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = useState("");
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
-    const savedHistory = localStorage.getItem('studystream_history');
+    const savedHistory = localStorage.getItem("studystream_history");
     if (savedHistory) {
       try {
         setHistory(JSON.parse(savedHistory));
       } catch (e) {
-        console.error('Error loading history:', e);
+        console.error("Error loading history:", e);
       }
     }
   }, []);
@@ -30,27 +38,27 @@ function VideoInput({ onAnalyze, isLoading }) {
   const CAPABILITIES = [
     {
       icon: MessageSquare,
-      title: 'AI Tutor',
-      desc: 'Ask anything. Get answers grounded in the lecture.',
-      color: 'text-blue-400',
-      border: 'hover:border-blue-800/60',
-      bg: 'hover:bg-blue-950/20',
+      title: "Ask questions",
+      desc: "Find an explanation without scrubbing through the video.",
+      color: "text-blue-400",
+      border: "hover:border-blue-800/60",
+      bg: "hover:bg-blue-950/20",
     },
     {
       icon: HelpCircle,
-      title: 'Quizzes',
-      desc: 'AI-generated questions to test your understanding.',
-      color: 'text-purple-400',
-      border: 'hover:border-purple-800/60',
-      bg: 'hover:bg-purple-950/20',
+      title: "Check yourself",
+      desc: "A short quiz built from what the lecture covers.",
+      color: "text-purple-400",
+      border: "hover:border-purple-800/60",
+      bg: "hover:bg-purple-950/20",
     },
     {
       icon: Clock,
-      title: 'Sources',
-      desc: 'Click a timestamp to jump to the exact lecture moment.',
-      color: 'text-cyan-400',
-      border: 'hover:border-cyan-800/60',
-      bg: 'hover:bg-cyan-950/20',
+      title: "Jump to the source",
+      desc: "Every answer points back to a moment in the lecture.",
+      color: "text-cyan-400",
+      border: "hover:border-cyan-800/60",
+      bg: "hover:bg-cyan-950/20",
     },
   ];
 
@@ -58,13 +66,14 @@ function VideoInput({ onAnalyze, isLoading }) {
     <div className="flex flex-col items-center justify-center max-w-2xl mx-auto py-10 md:py-16 animate-fade-in">
       <div className="text-center mb-10">
         <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
-          Turn lectures into{' '}
+          Make a lecture easier to{" "}
           <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-            searchable knowledge
+            study
           </span>
         </h2>
         <p className="text-base text-slate-400 max-w-lg mx-auto">
-          Ask questions, generate quizzes, and get answers grounded in the lecture with timestamped sources.
+          Paste a YouTube lecture to get a short study guide, a quick check, and
+          answers tied to the transcript.
         </p>
       </div>
 
@@ -103,13 +112,27 @@ function VideoInput({ onAnalyze, isLoading }) {
         </div>
       </form>
 
+      <div className="study-transcript-card w-full max-w-md p-5 mb-10 text-left">
+        <div className="flex items-center justify-between border-b border-slate-800/50 pb-3 mb-4 study-eyebrow">
+          <span>lecture_transcript.txt</span>
+          <span>12:34</span>
+        </div>
+        <p className="text-sm leading-7 text-slate-700">
+          &quot;...the second law tells us that{" "}
+          <mark>entropy of an isolated system never decreases</mark> — this is
+          the direction time appears to flow in...&quot;
+        </p>
+        <p className="mt-4 text-xs text-rose-700 font-medium">
+          ↳ asked: &quot;what&apos;s entropy again?&quot; answered from 12:34
+        </p>
+      </div>
+
       {/* Pipeline label */}
       <div className="text-[11px] text-slate-500 mb-10 tracking-widest uppercase font-medium">
-        Captions <span className="text-slate-600 mx-1">→</span>
-        Chunking <span className="text-slate-600 mx-1">→</span>
-        Embeddings <span className="text-slate-600 mx-1">→</span>
-        Vector Search <span className="text-slate-600 mx-1">→</span>
-        Grounded Answers
+        Transcript <span className="text-slate-600 mx-1">→</span>
+        Study guide <span className="text-slate-600 mx-1">→</span>
+        Questions <span className="text-slate-600 mx-1">→</span>
+        Sources
       </div>
 
       {/* Capability Cards */}
@@ -122,7 +145,9 @@ function VideoInput({ onAnalyze, isLoading }) {
               className={`flex flex-col items-center text-center p-5 rounded-xl bg-slate-900/30 border border-slate-850 ${cap.border} ${cap.bg} transition-all duration-200 cursor-default`}
             >
               <Icon className={`w-6 h-6 mb-3 ${cap.color}`} />
-              <p className="text-sm font-semibold text-slate-200 mb-1">{cap.title}</p>
+              <p className="text-sm font-semibold text-slate-200 mb-1">
+                {cap.title}
+              </p>
               <p className="text-xs text-slate-500 leading-snug">{cap.desc}</p>
             </div>
           );
@@ -134,7 +159,7 @@ function VideoInput({ onAnalyze, isLoading }) {
         <div className="w-full border-t border-slate-900 pt-8 animate-fade-in">
           <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold mb-4 px-2 tracking-wider uppercase">
             <History className="w-3.5 h-3.5" />
-            Recent Lectures
+            Recent
           </div>
           <div className="grid gap-2">
             {history.slice(0, 3).map((item, index) => (
@@ -151,7 +176,9 @@ function VideoInput({ onAnalyze, isLoading }) {
                   </span>
                 </div>
                 <span className="text-[10px] text-slate-500 shrink-0 font-mono hidden sm:inline-block">
-                  {item.videoId ? `ID: ${item.videoId.substring(0, 6)}...` : 'YouTube'}
+                  {item.videoId
+                    ? `ID: ${item.videoId.substring(0, 6)}...`
+                    : "YouTube"}
                 </span>
               </button>
             ))}

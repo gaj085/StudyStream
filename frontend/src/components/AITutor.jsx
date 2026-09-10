@@ -1,23 +1,33 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Bot, X, Send, Loader2, Clock, ExternalLink, Sparkles, ChevronRight } from 'lucide-react';
-import axios from 'axios';
-import ReactMarkdown from 'react-markdown';
-import PerformanceMetrics from './PerformanceMetrics';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  Bot,
+  X,
+  Send,
+  Loader2,
+  Clock,
+  ExternalLink,
+  MessageCircle,
+  ChevronRight,
+} from "lucide-react";
+import axios from "axios";
+import ReactMarkdown from "react-markdown";
+import PerformanceMetrics from "./PerformanceMetrics";
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
 const SUGGESTED_QUESTIONS = [
-  'Can you summarize the main idea?',
-  'Explain the most important concept simply.',
-  'What are the key takeaways from this lecture?',
-  'What should I learn next after this?',
+  "What is the main idea?",
+  "Can you explain the hardest part?",
+  "What are the three things to remember?",
+  "Where does the lecture discuss this most clearly?",
 ];
 
 function formatTime(seconds) {
-  if (seconds == null || isNaN(seconds)) return '??:??';
+  if (seconds == null || isNaN(seconds)) return "??:??";
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
-  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 }
 
 /**
@@ -26,8 +36,8 @@ function formatTime(seconds) {
  */
 function buildTimestampUrl(videoUrl, startTimeSeconds) {
   if (!videoUrl || startTimeSeconds == null) return null;
-  const base = videoUrl.replace(/[&?]t=\d+s?/g, '');
-  const separator = base.includes('?') ? '&' : '?';
+  const base = videoUrl.replace(/[&?]t=\d+s?/g, "");
+  const separator = base.includes("?") ? "&" : "?";
   return `${base}${separator}t=${Math.floor(startTimeSeconds)}s`;
 }
 
@@ -65,17 +75,20 @@ function SourceCard({ source, videoUrl, index }) {
 
       {/* Snippet */}
       <p className="px-3 py-2 text-[11px] text-slate-450 leading-relaxed italic line-clamp-2">
-        "{snippet}{isSnippetTruncated ? '…' : ''}"
+        "{snippet}
+        {isSnippetTruncated ? "…" : ""}"
       </p>
     </div>
   );
 }
 
 function ChatMessage({ msg, videoUrl }) {
-  const isUser = msg.role === 'user';
+  const isUser = msg.role === "user";
 
   return (
-    <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} mb-5 animate-fade-in`}>
+    <div
+      className={`flex flex-col ${isUser ? "items-end" : "items-start"} mb-5 animate-fade-in`}
+    >
       {isUser ? (
         <div className="max-w-[90%] px-4 py-2.5 bg-blue-600/20 border border-blue-700/30 rounded-2xl rounded-tr-sm text-sm text-blue-100 leading-relaxed shadow-sm">
           {msg.content}
@@ -87,36 +100,74 @@ function ChatMessage({ msg, videoUrl }) {
             <div className="w-6 h-6 rounded-full bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0 shadow-sm">
               <Bot className="w-3.5 h-3.5" />
             </div>
-            <span className="text-xs font-semibold text-purple-400">AI Tutor</span>
+            <span className="text-xs font-semibold text-purple-400">Tutor</span>
           </div>
 
           {/* Answer text rendered as Markdown */}
           <div className="text-sm text-slate-300 leading-relaxed space-y-2">
             <ReactMarkdown
               components={{
-                p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed text-slate-300">{children}</p>,
-                ul: ({ children }) => <ul className="list-disc pl-5 mb-2 space-y-1.5">{children}</ul>,
-                ol: ({ children }) => <ol className="list-decimal pl-5 mb-2 space-y-1.5">{children}</ol>,
-                li: ({ children }) => <li className="text-slate-300 leading-relaxed">{children}</li>,
-                strong: ({ children }) => <strong className="font-bold text-slate-100">{children}</strong>,
-                em: ({ children }) => <em className="italic text-slate-200">{children}</em>,
+                p: ({ children }) => (
+                  <p className="mb-2 last:mb-0 leading-relaxed text-slate-300">
+                    {children}
+                  </p>
+                ),
+                ul: ({ children }) => (
+                  <ul className="list-disc pl-5 mb-2 space-y-1.5">
+                    {children}
+                  </ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="list-decimal pl-5 mb-2 space-y-1.5">
+                    {children}
+                  </ol>
+                ),
+                li: ({ children }) => (
+                  <li className="text-slate-300 leading-relaxed">{children}</li>
+                ),
+                strong: ({ children }) => (
+                  <strong className="font-bold text-slate-100">
+                    {children}
+                  </strong>
+                ),
+                em: ({ children }) => (
+                  <em className="italic text-slate-200">{children}</em>
+                ),
                 code: ({ className, children, ...props }) => {
                   const inline = !className;
                   return inline ? (
-                    <code className="bg-slate-900 border border-slate-800 px-1 py-0.5 rounded text-purple-300 font-mono text-xs" {...props}>
+                    <code
+                      className="bg-slate-900 border border-slate-800 px-1 py-0.5 rounded text-purple-300 font-mono text-xs"
+                      {...props}
+                    >
                       {children}
                     </code>
                   ) : (
                     <pre className="bg-slate-950 border border-slate-900/60 p-3 rounded-lg overflow-x-auto my-2.5 shadow-inner">
-                      <code className={`${className} text-slate-250 font-mono text-xs block`} {...props}>
+                      <code
+                        className={`${className} text-slate-250 font-mono text-xs block`}
+                        {...props}
+                      >
                         {children}
                       </code>
                     </pre>
                   );
                 },
-                h1: ({ children }) => <h1 className="text-base font-bold text-slate-200 mt-4 mb-2 border-b border-slate-800/40 pb-1">{children}</h1>,
-                h2: ({ children }) => <h2 className="text-sm font-bold text-slate-200 mt-4 mb-2">{children}</h2>,
-                h3: ({ children }) => <h3 className="text-xs font-bold text-slate-350 mt-3 mb-1.5">{children}</h3>,
+                h1: ({ children }) => (
+                  <h1 className="text-base font-bold text-slate-200 mt-4 mb-2 border-b border-slate-800/40 pb-1">
+                    {children}
+                  </h1>
+                ),
+                h2: ({ children }) => (
+                  <h2 className="text-sm font-bold text-slate-200 mt-4 mb-2">
+                    {children}
+                  </h2>
+                ),
+                h3: ({ children }) => (
+                  <h3 className="text-xs font-bold text-slate-350 mt-3 mb-1.5">
+                    {children}
+                  </h3>
+                ),
               }}
             >
               {msg.content}
@@ -128,11 +179,16 @@ function ChatMessage({ msg, videoUrl }) {
             <div className="mt-5 pt-4 border-t border-slate-800/40">
               <p className="text-[10px] font-bold uppercase tracking-wider text-purple-400 mb-2 flex items-center gap-1.5">
                 <ChevronRight className="w-3.5 h-3.5" />
-                Sources from transcript
+                From the transcript
               </p>
               <div className="space-y-1">
                 {msg.sources.map((s, i) => (
-                  <SourceCard key={i} source={s} videoUrl={videoUrl} index={i} />
+                  <SourceCard
+                    key={i}
+                    source={s}
+                    videoUrl={videoUrl}
+                    index={i}
+                  />
                 ))}
               </div>
             </div>
@@ -146,8 +202,15 @@ function ChatMessage({ msg, videoUrl }) {
   );
 }
 
-function AITutor({ videoId, videoUrl, isOpen, onClose, onOpen, initialQuestion }) {
-  const [input, setInput] = useState('');
+function AITutor({
+  videoId,
+  videoUrl,
+  isOpen,
+  onClose,
+  onOpen,
+  initialQuestion,
+}) {
+  const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef(null);
@@ -159,7 +222,7 @@ function AITutor({ videoId, videoUrl, isOpen, onClose, onOpen, initialQuestion }
   // Auto-scroll to the bottom whenever messages or loading state changes
   useEffect(() => {
     if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+      bottomRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, loading]);
 
@@ -180,25 +243,29 @@ function AITutor({ videoId, videoUrl, isOpen, onClose, onOpen, initialQuestion }
     const q = questionText || input.trim();
     if (!q || !videoId || loading) return;
 
-    const userMsg = { role: 'user', content: q };
-    setMessages(prev => [...prev, userMsg]);
-    setInput('');
+    const userMsg = { role: "user", content: q };
+    setMessages((prev) => [...prev, userMsg]);
+    setInput("");
     setLoading(true);
 
     try {
-      const res = await axios.post(`${API_BASE_URL}/videos/${videoId}/chat`, { question: q });
+      const res = await axios.post(`${API_BASE_URL}/videos/${videoId}/chat`, {
+        question: q,
+      });
       const assistantMsg = {
-        role: 'assistant',
+        role: "assistant",
         content: res.data.answer,
         sources: res.data.sources || [],
         latency: res.data.latency,
       };
-      setMessages(prev => [...prev, assistantMsg]);
+      setMessages((prev) => [...prev, assistantMsg]);
     } catch (err) {
-      const errMsg = err.response?.data?.error || 'Something went wrong. Please check the backend connection.';
-      setMessages(prev => [
+      const errMsg =
+        err.response?.data?.error ||
+        "Something went wrong. Please check the backend connection.";
+      setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: errMsg, sources: [] },
+        { role: "assistant", content: errMsg, sources: [] },
       ]);
     } finally {
       setLoading(false);
@@ -206,7 +273,7 @@ function AITutor({ videoId, videoUrl, isOpen, onClose, onOpen, initialQuestion }
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
@@ -217,11 +284,11 @@ function AITutor({ videoId, videoUrl, isOpen, onClose, onOpen, initialQuestion }
       {/* Mobile toggle button */}
       <button
         onClick={onOpen}
-        aria-label="Open AI Tutor"
-        className={`fixed bottom-6 right-6 z-50 lg:hidden flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-2xl shadow-blue-500/30 transition-all ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+        aria-label="Open Tutor"
+        className={`fixed bottom-6 right-6 z-50 lg:hidden flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-2xl shadow-blue-500/30 transition-all ${isOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       >
         <Bot className="w-5 h-5" />
-        AI Tutor
+        Tutor
       </button>
 
       {/* Mobile backdrop overlay */}
@@ -240,7 +307,7 @@ function AITutor({ videoId, videoUrl, isOpen, onClose, onOpen, initialQuestion }
           w-[90vw] sm:w-96 lg:w-auto lg:h-[calc(100vh-2rem)] lg:max-h-[900px]
           glass-panel-glow border-l border-slate-800/80 rounded-l-2xl lg:rounded-2xl
           transition-transform duration-300 ease-in-out
-          ${isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+          ${isOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"}
           overflow-hidden shadow-2xl
         `}
       >
@@ -251,13 +318,15 @@ function AITutor({ videoId, videoUrl, isOpen, onClose, onOpen, initialQuestion }
               <Bot className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-slate-100">AI Tutor</h2>
-              <p className="text-[10px] text-slate-500">RAG-powered · Grounded in transcript</p>
+              <h2 className="text-sm font-bold text-slate-100">Tutor</h2>
+              <p className="text-[10px] text-slate-500">
+                Based on this transcript
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            aria-label="Close AI Tutor"
+            aria-label="Close Tutor"
             className="text-slate-500 hover:text-slate-200 transition-colors p-1 rounded-md hover:bg-slate-800 lg:hidden"
           >
             <X className="w-4 h-4" />
@@ -270,10 +339,14 @@ function AITutor({ videoId, videoUrl, isOpen, onClose, onOpen, initialQuestion }
           {messages.length === 0 && !loading && (
             <div className="text-center pt-6 animate-fade-in">
               <div className="w-12 h-12 rounded-full bg-purple-600/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-3">
-                <Sparkles className="w-6 h-6 text-purple-400" />
+                <MessageCircle className="w-6 h-6 text-purple-400" />
               </div>
-              <p className="text-sm font-medium text-slate-300 mb-1">Ask anything about this lecture</p>
-              <p className="text-xs text-slate-500 mb-6">Answers are grounded in the video transcript</p>
+              <p className="text-sm font-medium text-slate-300 mb-1">
+                Ask anything about this lecture
+              </p>
+              <p className="text-xs text-slate-500 mb-6">
+                Ask about anything covered in the lecture.
+              </p>
 
               <div className="space-y-2">
                 {SUGGESTED_QUESTIONS.map((q, i) => (
@@ -301,7 +374,9 @@ function AITutor({ videoId, videoUrl, isOpen, onClose, onOpen, initialQuestion }
               <div className="w-6 h-6 rounded-full bg-purple-600/20 border border-purple-500/30 flex items-center justify-center shrink-0">
                 <Loader2 className="w-3.5 h-3.5 text-purple-400 animate-spin" />
               </div>
-              <span className="text-xs animate-pulse">AI Tutor is searching the lecture…</span>
+              <span className="text-xs animate-pulse">
+                Looking through the lecture…
+              </span>
             </div>
           )}
 
@@ -315,7 +390,7 @@ function AITutor({ videoId, videoUrl, isOpen, onClose, onOpen, initialQuestion }
               type="text"
               id="ai-tutor-input"
               value={input}
-              onChange={e => setInput(e.target.value)}
+              onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask a question about the lecture..."
               disabled={loading || !videoId}

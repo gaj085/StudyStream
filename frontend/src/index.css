@@ -1,13 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Work+Sans:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --paper: #f5f1e8;
+  --paper-2: #ece5d6;
+  --ink: #22303c;
+  --ink-soft: #4a5a66;
+  --highlighter: #ffd23f;
+  --highlighter-soft: #ffe9a8;
+  --pen-red: #c1443c;
+  --pen-blue: #3a5a9b;
+  --card: #fbf8f1;
+  --line: rgba(34, 48, 60, 0.14);
+}
+
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 min-h-screen overflow-x-hidden selection:bg-blue-600/30 selection:text-blue-200;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    @apply min-h-screen overflow-x-hidden;
+    background: #fff;
+    color: var(--ink);
+    font-family: 'Work Sans', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background-image: linear-gradient(rgba(34, 48, 60, 0.025) 1px, transparent 1px);
+    background-size: 100% 36px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    letter-spacing: 0;
   }
 }
+
+/* The interface uses a paper-and-ink vocabulary. These overrides keep the
+   existing component markup while replacing the original dashboard palette. */
+.bg-grid {
+  background-color: transparent;
+  background-image: none;
+}
+
+.glass-panel,
+.glass-panel-glow {
+  background: var(--card) !important;
+  border: 1.5px solid var(--ink) !important;
+  border-radius: 4px !important;
+  box-shadow: 5px 5px 0 var(--paper-2) !important;
+  backdrop-filter: none !important;
+}
+
+[class*='bg-slate-'] { background-color: var(--card) !important; }
+[class*='bg-blue-'] { background-color: rgba(58, 90, 155, 0.1) !important; }
+[class*='bg-purple-'] { background-color: rgba(193, 68, 60, 0.08) !important; }
+[class*='bg-cyan-'] { background-color: rgba(255, 210, 63, 0.24) !important; }
+[class*='bg-emerald-'] { background-color: rgba(63, 118, 85, 0.12) !important; }
+[class*='bg-rose-'] { background-color: rgba(193, 68, 60, 0.1) !important; }
+
+[class*='border-slate-'] { border-color: var(--line) !important; }
+[class*='border-blue-'] { border-color: rgba(58, 90, 155, 0.45) !important; }
+[class*='border-purple-'] { border-color: rgba(193, 68, 60, 0.4) !important; }
+[class*='border-cyan-'] { border-color: rgba(34, 48, 60, 0.25) !important; }
+
+[class*='text-slate-'] { color: var(--ink-soft) !important; }
+[class*='text-blue-'] { color: var(--pen-blue) !important; }
+[class*='text-purple-'] { color: var(--pen-red) !important; }
+[class*='text-cyan-'] { color: #8b6900 !important; }
+[class*='text-emerald-'] { color: #3f7655 !important; }
+[class*='text-rose-'] { color: var(--pen-red) !important; }
+
+[class*='bg-gradient-to-'] { background-image: none !important; background-color: var(--ink) !important; }
+[class*='bg-clip-text'] {
+  background: var(--highlighter-soft) !important;
+  color: var(--ink) !important;
+  -webkit-text-fill-color: var(--ink) !important;
+  background-clip: border-box !important;
+}
+
+button { border-radius: 3px !important; }
+input { border-radius: 3px !important; }
 
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
@@ -21,50 +96,40 @@
   @apply bg-slate-800/80 rounded-full hover:bg-slate-700/80;
 }
 
-/* Glassmorphism card */
+/* Shared component surfaces */
 .glass-panel {
-  @apply bg-slate-900/60 backdrop-blur-md border border-slate-800/60 shadow-xl shadow-black/20;
+  @apply shadow-xl;
 }
 
 .glass-panel-glow {
-  @apply bg-slate-900/70 backdrop-blur-lg border border-slate-800/80 shadow-2xl shadow-blue-500/5;
+  @apply shadow-2xl;
 }
 
 /* Custom Grid Background */
-.bg-grid {
-  background-image: 
-    radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.12), transparent 50%),
-    radial-gradient(circle at 10% 40%, rgba(139, 92, 246, 0.05), transparent 45%),
-    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
-}
-
-/* Custom animations for background blobs */
-@keyframes pulseGlow {
-  0%, 100% {
-    transform: scale(1) translate(0px, 0px);
-    opacity: 0.2;
-  }
-  33% {
-    transform: scale(1.1) translate(30px, -50px);
-    opacity: 0.35;
-  }
-  66% {
-    transform: scale(0.9) translate(-20px, 20px);
-    opacity: 0.25;
-  }
-}
-
-.animate-glow-1 {
-  animation: pulseGlow 15s infinite alternate ease-in-out;
-}
-
-.animate-glow-2 {
-  animation: pulseGlow 20s infinite alternate-reverse ease-in-out;
-}
-
 /* Glow Border Focus */
 .glow-focus {
-  @apply transition-all duration-300 focus:border-blue-500/80 focus:ring-2 focus:ring-blue-500/20 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)];
+  @apply transition-all duration-300 focus:border-blue-500/80 focus:ring-2 focus:ring-blue-500/20;
+}
+
+.study-transcript-card {
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+  box-shadow: 6px 6px 0 var(--paper-2);
+  font-family: 'IBM Plex Mono', monospace;
+  transform: rotate(1deg);
+}
+
+.study-transcript-card mark {
+  background: var(--highlighter);
+  color: var(--ink);
+  padding: 1px 2px;
+}
+
+.study-eyebrow {
+  color: var(--pen-blue);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }

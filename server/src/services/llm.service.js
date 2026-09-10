@@ -1,46 +1,107 @@
-const { Mistral } = require('@mistralai/mistralai');
+const { Mistral } = require("@mistralai/mistralai");
 
-const apiKey = process.env.LLM_API_KEY || 'dummy_key';
-const llmModel = process.env.LLM_MODEL || 'mistral-large-latest';
+const FALLBACK_MODEL = "open-mistral-nemo";
+const apiKey = process.env.LLM_API_KEY || "dummy_key";
+
+function resolveModelName(requestedModel) {
+  if (!requestedModel) return FALLBACK_MODEL;
+  if (
+    requestedModel === "mistral-large-latest" ||
+    requestedModel.startsWith("mistral-large")
+  ) {
+    return FALLBACK_MODEL;
+  }
+  return requestedModel;
+}
+
+function normalizeSummaryResult(result) {
+  if (!result || typeof result !== "object") return result;
+
+  const keyConcepts = Array.isArray(result.keyConcepts)
+    ? result.keyConcepts.map((item) => String(item))
+    : [];
+
+  const takeaways = Array.isArray(result.takeaways)
+    ? result.takeaways.map((item) => {
+        if (typeof item === "string") return item;
+        if (item && typeof item === "object") {
+          const action = item.action || item.title || "Takeaway";
+          const insight =
+            item.insight || item.description || item.summary || "";
+          return insight ? `${action}: ${insight}` : String(action);
+        }
+        return String(item ?? "");
+      })
+    : [];
+
+  return {
+    ...result,
+    keyConcepts,
+    takeaways,
+  };
+}
+
+const llmModel = resolveModelName(
+  process.env.LLM_MODEL || "mistral-large-latest",
+);
 const client = new Mistral({ apiKey });
 
-/**
- * Detects if a student question is a high-level/generic request about the whole lecture.
- */
+async function callModel({ model, messages, responseFormat }) {
+  try {
+    return await client.chat.complete({ model, messages, responseFormat });
+  } catch (error) {
+    const isTierBlocked =
+      error?.status === 403 ||
+      error?.code === 1910 ||
+      /not available in your subscription tier|tier_not_allowed/i.test(
+        error?.message || "",
+      );
+
+    if (isTierBlocked && model !== FALLBACK_MODEL) {
+      console.warn(
+        `[LLM] Model ${model} is unavailable for this subscription. Retrying with ${FALLBACK_MODEL}.`,
+      );
+      return client.chat.complete({
+        model: FALLBACK_MODEL,
+        messages,
+        responseFormat,
+      });
+    }
+
+    throw error;
+  }
+}
+
 function isGenericQuestion(question) {
   const q = question.toLowerCase().trim();
   return (
-    q.includes('summarize') || 
-    q.includes('summary') || 
-    q.includes('main idea') || 
-    q.includes('main point') ||
-    q.includes('key concepts') || 
-    q.includes('key takeaways') || 
-    q.includes('what is this video about') ||
-    q.includes('what is this lecture about') ||
-    q.includes('what is the lecture about') ||
-    q.includes('what is the video about') ||
-    q === 'explain the most important concept simply.'
+    q.includes("summarize") ||
+    q.includes("summary") ||
+    q.includes("main idea") ||
+    q.includes("main point") ||
+    q.includes("key concepts") ||
+    q.includes("key takeaways") ||
+    q.includes("what is this video about") ||
+    q.includes("what is this lecture about") ||
+    q.includes("what is the lecture about") ||
+    q.includes("what is the video about") ||
+    q === "explain the most important concept simply."
   );
 }
 
-/**
- * Generates a grounded chat response using retrieved transcript chunks.
- * The system prompt explicitly forbids using knowledge outside the provided context.
- */
 async function generateChatResponse(question, contextChunks, videoSummary) {
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);
     const s = Math.floor(seconds % 60);
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
   const contextString = contextChunks
     .map(
       (chunk, i) =>
-        `[Source ${i + 1} | ${formatTime(chunk.startTime)}–${formatTime(chunk.endTime)}]\n${chunk.text}`
+        `[Source ${i + 1} | ${formatTime(chunk.startTime)}–${formatTime(chunk.endTime)}]\n${chunk.text}`,
     )
-    .join('\n\n');
+    .join("\n\n");
 
   const systemPrompt = `You are StudyStream, an AI tutor that helps students learn from video lectures.
 
@@ -59,15 +120,15 @@ Style Guidelines:
   * Followed by 2 to 4 useful supporting bullet points.
   * Do not make it verbose or dump unrelated concepts.`;
 
-  let userPrompt = '';
+  let userPrompt = "";
   const isGeneric = isGenericQuestion(question);
 
   if (isGeneric && videoSummary) {
     userPrompt += `Here is the high-level summary of the entire lecture:
 Title: ${videoSummary.title}
 Summary: ${videoSummary.summary}
-Key Concepts: ${(videoSummary.keyConcepts || []).join(', ')}
-Takeaways: ${(videoSummary.takeaways || []).join(', ')}
+Key Concepts: ${(videoSummary.keyConcepts || []).join(", ")}
+Takeaways: ${(videoSummary.takeaways || []).join(", ")}
 
 ---
 
@@ -84,11 +145,11 @@ Student question: ${question}`;
 
   try {
     const startTime = Date.now();
-    const chatResponse = await client.chat.complete({
+    const chatResponse = await callModel({
       model: llmModel,
       messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
       ],
     });
     const duration = Date.now() - startTime;
@@ -98,17 +159,17 @@ Student question: ${question}`;
       latency: duration,
     };
   } catch (error) {
-    console.error('[LLM] Error generating chat response:', error.message);
+    console.error("[LLM] Error generating chat response:", error.message);
     throw error;
   }
 }
 
-/**
- * Generates a structured summary of the video from transcript segments.
- */
 async function generateSummary(segments) {
   // Use first 100 segments to keep within token limits
-  const text = segments.slice(0, 100).map(s => s.text).join(' ');
+  const text = segments
+    .slice(0, 100)
+    .map((s) => s.text)
+    .join(" ");
 
   const prompt = `Based on the following transcript snippet from an educational video, generate:
 1. Title
@@ -122,24 +183,26 @@ Transcript:
 ${text}`;
 
   try {
-    const response = await client.chat.complete({
+    const response = await callModel({
       model: llmModel,
-      messages: [{ role: 'user', content: prompt }],
-      responseFormat: { type: 'json_object' },
+      messages: [{ role: "user", content: prompt }],
+      responseFormat: { type: "json_object" },
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    return normalizeSummaryResult(
+      JSON.parse(response.choices[0].message.content),
+    );
   } catch (error) {
-    console.error('[LLM] Error generating summary:', error.message);
+    console.error("[LLM] Error generating summary:", error.message);
     throw error;
   }
 }
 
-/**
- * Generates a 5-question multiple choice quiz from transcript segments.
- */
 async function generateQuiz(segments) {
-  const text = segments.slice(0, 100).map(s => s.text).join(' ');
+  const text = segments
+    .slice(0, 100)
+    .map((s) => s.text)
+    .join(" ");
 
   const prompt = `Based on the following transcript snippet, generate a 5-question multiple choice quiz.
 Each question should have 4 options (A, B, C, D).
@@ -153,10 +216,10 @@ Transcript:
 ${text}`;
 
   try {
-    const response = await client.chat.complete({
+    const response = await callModel({
       model: llmModel,
-      messages: [{ role: 'user', content: prompt }],
-      responseFormat: { type: 'json_object' },
+      messages: [{ role: "user", content: prompt }],
+      responseFormat: { type: "json_object" },
     });
 
     let result = JSON.parse(response.choices[0].message.content);
@@ -166,12 +229,14 @@ ${text}`;
     if (result.quiz) return result.quiz;
     return result;
   } catch (error) {
-    console.error('[LLM] Error generating quiz:', error.message);
+    console.error("[LLM] Error generating quiz:", error.message);
     throw error;
   }
 }
 
 module.exports = {
+  resolveModelName,
+  normalizeSummaryResult,
   generateChatResponse,
   generateSummary,
   generateQuiz,
