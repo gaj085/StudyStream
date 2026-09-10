@@ -60,7 +60,6 @@ function QuizSection({ quiz, onAskTutor }) {
   if (!started) {
     return (
       <div className="glass-panel p-8 rounded-xl border border-slate-800/85 text-center flex flex-col items-center justify-center animate-fade-in relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="w-16 h-16 rounded-2xl bg-purple-600/20 border border-purple-500/30 text-purple-400 flex items-center justify-center mb-4">
           <HelpCircle className="w-8 h-8" />
         </div>

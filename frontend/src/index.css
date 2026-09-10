@@ -5,15 +5,15 @@
 @tailwind utilities;
 
 :root {
-  --paper: #f5f1e8;
-  --paper-2: #ece5d6;
+  --paper: #f4f5f3;
+  --paper-2: #e6e9e5;
   --ink: #22303c;
   --ink-soft: #4a5a66;
   --highlighter: #ffd23f;
   --highlighter-soft: #ffe9a8;
   --pen-red: #c1443c;
   --pen-blue: #3a5a9b;
-  --card: #fbf8f1;
+  --card: #ffffff;
   --line: rgba(34, 48, 60, 0.14);
 }
 
@@ -48,9 +48,9 @@
 .glass-panel,
 .glass-panel-glow {
   background: var(--card) !important;
-  border: 1.5px solid var(--ink) !important;
-  border-radius: 4px !important;
-  box-shadow: 5px 5px 0 var(--paper-2) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 8px 24px rgba(34, 48, 60, 0.08) !important;
   backdrop-filter: none !important;
 }
 
@@ -83,6 +83,15 @@
 
 button { border-radius: 3px !important; }
 input { border-radius: 3px !important; }
+
+.performance-panel {
+  border-left: 3px solid var(--pen-red);
+  padding-left: 0.75rem;
+}
+
+.performance-panel .font-mono {
+  font-variant-numeric: tabular-nums;
+}
 
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
@@ -127,9 +136,9 @@ input { border-radius: 3px !important; }
 }
 
 .study-eyebrow {
-  color: var(--pen-blue);
+  color: var(--ink-soft);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }

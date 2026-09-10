@@ -25,7 +25,6 @@ function SummarySection({ summary }) {
     <div className="space-y-6 animate-fade-in">
       {/* Title & Summary */}
       <div className="glass-panel p-6 md:p-8 rounded-xl border border-slate-800/80 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/5 rounded-full blur-3xl pointer-events-none"></div>
         <div className="flex items-start gap-4 mb-4">
           <div className="w-10 h-10 rounded-lg bg-blue-600/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
             <BookOpen className="w-5 h-5" />
@@ -55,22 +54,20 @@ function SummarySection({ summary }) {
             </h4>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <ul className="space-y-2">
             {keyConcepts.length > 0 ? (
               keyConcepts.map((kc, i) => (
-                <span
+                <li
                   key={i}
-                  className="px-3 py-1.5 text-xs font-semibold text-purple-300 hover:text-white bg-purple-950/20 border border-purple-900/40 hover:border-purple-500/40 rounded-full transition-all duration-200 cursor-default"
+                  className="border-l-2 border-blue-400/50 pl-3 text-xs font-medium leading-relaxed text-slate-500"
                 >
                   {kc}
-                </span>
+                </li>
               ))
             ) : (
-              <span className="text-xs text-slate-500">
-                No key concepts found.
-              </span>
+              <li className="text-xs text-slate-500">No key concepts found.</li>
             )}
-          </div>
+          </ul>
         </div>
 
         {/* Takeaways */}
