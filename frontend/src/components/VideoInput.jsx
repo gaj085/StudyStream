@@ -35,6 +35,21 @@ function VideoInput({ onAnalyze, isLoading }) {
     onAnalyze(historyUrl);
   };
 
+  const updateHistory = (nextHistory) => {
+    setHistory(nextHistory);
+    localStorage.setItem("studystream_history", JSON.stringify(nextHistory));
+  };
+
+  const clearHistoryItem = (historyUrl) => {
+    const nextHistory = history.filter((item) => item.url !== historyUrl);
+    updateHistory(nextHistory);
+  };
+
+  const clearAllHistory = () => {
+    setHistory([]);
+    localStorage.removeItem("studystream_history");
+  };
+
   const CAPABILITIES = [
     {
       icon: MessageSquare,
@@ -157,30 +172,55 @@ function VideoInput({ onAnalyze, isLoading }) {
       {/* Lightweight History Panel */}
       {history.length > 0 && (
         <div className="w-full border-t border-slate-900 pt-8 animate-fade-in">
-          <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold mb-4 px-2 tracking-wider uppercase">
-            <History className="w-3.5 h-3.5" />
-            Recent
+          <div className="flex items-center justify-between gap-3 text-slate-400 text-xs font-semibold mb-4 px-2 tracking-wider uppercase">
+            <div className="flex items-center gap-2">
+              <History className="w-3.5 h-3.5" />
+              Recent
+            </div>
+            <button
+              type="button"
+              onClick={clearAllHistory}
+              className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-300 hover:text-rose-300 transition-colors"
+            >
+              Clear all
+            </button>
           </div>
           <div className="grid gap-2">
             {history.slice(0, 3).map((item, index) => (
-              <button
+              <div
                 key={index}
-                onClick={() => handleSelectHistory(item.url)}
-                disabled={isLoading}
-                className="flex items-center justify-between text-left p-3.5 bg-slate-900/30 hover:bg-slate-900/60 border border-slate-850 hover:border-slate-800 rounded-lg group transition-all duration-200"
+                className="flex items-center gap-2 rounded-lg border border-slate-850 bg-slate-900/30 hover:bg-slate-900/60 transition-all duration-200"
               >
-                <div className="flex items-center gap-3 min-w-0 pr-4">
-                  <Play className="w-3.5 h-3.5 text-blue-400 shrink-0 opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all" />
-                  <span className="text-sm font-medium text-slate-350 group-hover:text-slate-200 truncate">
-                    {item.title || item.url}
+                <button
+                  type="button"
+                  onClick={() => handleSelectHistory(item.url)}
+                  disabled={isLoading}
+                  className="flex flex-1 items-center justify-between text-left p-3.5 group"
+                >
+                  <div className="flex items-center gap-3 min-w-0 pr-4">
+                    <Play className="w-3.5 h-3.5 text-blue-400 shrink-0 opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all" />
+                    <span className="text-sm font-medium text-slate-350 group-hover:text-slate-200 truncate">
+                      {item.title || item.url}
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-500 shrink-0 font-mono hidden sm:inline-block">
+                    {item.videoId
+                      ? `ID: ${item.videoId.substring(0, 6)}...`
+                      : "YouTube"}
                   </span>
-                </div>
-                <span className="text-[10px] text-slate-500 shrink-0 font-mono hidden sm:inline-block">
-                  {item.videoId
-                    ? `ID: ${item.videoId.substring(0, 6)}...`
-                    : "YouTube"}
-                </span>
-              </button>
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Remove ${item.title || item.url}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    clearHistoryItem(item.url);
+                  }}
+                  className="mr-2 rounded-md border border-slate-700 bg-slate-950/40 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 hover:border-rose-500/60 hover:text-rose-300 transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
             ))}
           </div>
         </div>

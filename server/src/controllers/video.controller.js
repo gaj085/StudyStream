@@ -12,14 +12,84 @@ const { storeChunks, deleteChunks } = require("../clients/chroma.client");
 const { handleChat } = require("../services/rag.service");
 const { generateSummary, generateQuiz } = require("../services/llm.service");
 const { v4: uuidv4 } = require("uuid");
+const crypto = require("crypto");
 
 // Process-local metadata keeps this MVP simple; restarting the server loses
 // summaries and quizzes even though transcript vectors remain in ChromaDB.
 const videoStore = {};
+const urlCache = new Map();
+
+function normalizeYouTubeUrl(rawUrl) {
+  if (!rawUrl) return "";
+
+  try {
+    const url = new URL(rawUrl.trim());
+    const host = url.hostname.replace(/^www\./i, "");
+    const videoId = url.searchParams.get("v");
+
+    if (videoId) {
+      return `https://www.youtube.com/watch?v=${videoId}`;
+    }
+
+    if (host === "youtu.be") {
+      const id = url.pathname.replace(/^\//, "").split("/")[0];
+      if (id) return `https://www.youtube.com/watch?v=${id}`;
+    }
+
+    if (url.pathname.startsWith("/shorts/")) {
+      const id = url.pathname.split("/").filter(Boolean)[1];
+      if (id) return `https://www.youtube.com/watch?v=${id}`;
+    }
+
+    return url.href.replace(/&feature=.*$/i, "");
+  } catch (error) {
+    const match = rawUrl.match(/(?:v=|\/)([A-Za-z0-9_-]{11})(?:[?&]|$)/i);
+    if (match) {
+      return `https://www.youtube.com/watch?v=${match[1]}`;
+    }
+    return rawUrl.trim();
+  }
+}
+
+function getDeterministicVideoId(url) {
+  const normalized = normalizeYouTubeUrl(url);
+  return crypto
+    .createHash("sha256")
+    .update(normalized)
+    .digest("hex")
+    .slice(0, 24);
+}
+
+function clearVideoUrlCache(url) {
+  const normalized = normalizeYouTubeUrl(url);
+  if (!normalized) return false;
+  return urlCache.delete(normalized);
+}
+
+function clearAllVideoCaches() {
+  urlCache.clear();
+}
 
 async function processVideoBackground(jobId, youtubeUrl) {
   try {
-    const videoId = uuidv4();
+    const normalizedUrl = normalizeYouTubeUrl(youtubeUrl);
+    const cachedVideo = urlCache.get(normalizedUrl);
+
+    if (cachedVideo) {
+      const videoId = cachedVideo.videoId;
+      videoStore[videoId] = {
+        ...cachedVideo,
+        status: "ready",
+      };
+      completeJob(jobId, {
+        videoId,
+        chunkCount: cachedVideo.chunks?.length || 0,
+        fromCache: true,
+      });
+      return;
+    }
+
+    const videoId = getDeterministicVideoId(normalizedUrl);
 
     // 1. Transcribe (Fetch from YouTube)
     updateJobProgress(
@@ -98,13 +168,17 @@ async function processVideoBackground(jobId, youtubeUrl) {
     }
 
     // Save to in-memory store
-    videoStore[videoId] = {
+    const newCachedVideo = {
       videoId,
-      youtubeUrl,
+      youtubeUrl: normalizedUrl,
       summary,
       quiz,
+      chunks,
       status: "ready",
     };
+
+    videoStore[videoId] = newCachedVideo;
+    urlCache.set(normalizedUrl, newCachedVideo);
 
     // Complete
     completeJob(jobId, { videoId, chunkCount: chunks.length });
@@ -121,11 +195,9 @@ async function startVideoProcessing(req, res) {
   }
 
   if (!url.includes("youtube.com") && !url.includes("youtu.be")) {
-    return res
-      .status(400)
-      .json({
-        error: "Invalid YouTube URL. Please paste a valid YouTube link.",
-      });
+    return res.status(400).json({
+      error: "Invalid YouTube URL. Please paste a valid YouTube link.",
+    });
   }
 
   const jobId = createJob();
@@ -238,4 +310,6 @@ module.exports = {
   chat,
   getSummary,
   getQuiz,
+  clearVideoUrlCache,
+  clearAllVideoCaches,
 };

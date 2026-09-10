@@ -1,10 +1,14 @@
-const { CloudClient } = require("chromadb");
+const { ChromaClient, CloudClient } = require("chromadb");
 
-const client = new CloudClient({
-  apiKey: process.env.CHROMA_API_KEY,
-  tenant: process.env.CHROMA_TENANT,
-  database: process.env.CHROMA_DATABASE,
-});
+const client = process.env.CHROMA_API_KEY
+  ? new CloudClient({
+      apiKey: process.env.CHROMA_API_KEY,
+      tenant: process.env.CHROMA_TENANT,
+      database: process.env.CHROMA_DATABASE,
+    })
+  : new ChromaClient({
+      path: process.env.CHROMA_URL || "http://localhost:8000",
+    });
 
 const COLLECTION_NAME = "studystream_transcripts";
 
