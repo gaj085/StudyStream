@@ -327,7 +327,7 @@ function AITutor({
           <button
             onClick={onClose}
             aria-label="Close Tutor"
-            className="text-slate-500 hover:text-slate-200 transition-colors p-1 rounded-md hover:bg-slate-800 lg:hidden"
+            className="text-slate-500 hover:text-slate-200 transition-colors p-1 rounded-md hover:bg-slate-800"
           >
             <X className="w-4 h-4" />
           </button>

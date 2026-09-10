@@ -211,7 +211,7 @@ function App() {
                 {/* Video Status Badge */}
                 <div className="flex flex-wrap items-center justify-between gap-4 mb-8 p-4 glass-panel rounded-xl border border-emerald-900/30">
                   <div className="flex items-center gap-3">
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse"></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-green-600"></div>
                     <div>
                       <p className="text-xs font-bold uppercase tracking-wider text-emerald-400">
                         Ready to study
@@ -222,12 +222,10 @@ function App() {
                     </div>
                   </div>
                   <button
-                    onClick={() => {
-                      setTutorOpen(true);
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-purple-300 hover:text-purple-100 bg-purple-900/20 hover:bg-purple-900/40 border border-purple-800/40 hover:border-purple-600/60 rounded-lg transition-all"
+                    onClick={() => setTutorOpen((isOpen) => !isOpen)}
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-[#c1443c] hover:text-[#a63731] bg-white hover:bg-[#fff5f3] border border-[#c1443c] rounded-md transition-colors"
                   >
-                    Open Tutor
+                    {tutorOpen ? "Close Tutor" : "Open Tutor"}
                   </button>
                 </div>
 
@@ -247,14 +245,14 @@ function App() {
         </div>
 
         {/* AI Tutor Sidebar — only show when a video is ready */}
-        {isReady && (
+        {isReady && tutorOpen && (
           <div className="hidden lg:block w-96 shrink-0 sticky top-0 h-screen py-4 pr-4">
             <AITutor
               videoId={videoId}
               videoUrl={videoUrl}
               isOpen={true}
-              onClose={() => {}}
-              onOpen={() => {}}
+              onClose={() => setTutorOpen(false)}
+              onOpen={() => setTutorOpen(true)}
               initialQuestion={tutorInitialQuestion}
             />
           </div>

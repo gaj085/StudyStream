@@ -93,6 +93,17 @@ input { border-radius: 3px !important; }
   font-variant-numeric: tabular-nums;
 }
 
+.quiz-submit-button:not(:disabled) {
+  background: #c1443c !important;
+  border: 2px solid #c1443c;
+  color: #fff !important;
+}
+
+.quiz-submit-button:not(:disabled):hover {
+  background: #a63731 !important;
+  border-color: #a63731;
+}
+
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;

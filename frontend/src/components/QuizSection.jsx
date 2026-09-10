@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  HelpCircle,
   CheckCircle,
   XCircle,
   ArrowRight,
@@ -60,16 +59,13 @@ function QuizSection({ quiz, onAskTutor }) {
   if (!started) {
     return (
       <div className="glass-panel p-8 rounded-xl border border-slate-800/85 text-center flex flex-col items-center justify-center animate-fade-in relative overflow-hidden">
-        <div className="w-16 h-16 rounded-2xl bg-purple-600/20 border border-purple-500/30 text-purple-400 flex items-center justify-center mb-4">
-          <HelpCircle className="w-8 h-8" />
-        </div>
         <h3 className="text-2xl font-bold text-slate-100 mb-2">Quick check</h3>
         <p className="text-slate-400 mb-6 max-w-sm">
           See what stuck with a short quiz based on the lecture.
         </p>
         <button
           onClick={handleStart}
-          className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-lg shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-all transform hover:-translate-y-0.5"
+          className="px-6 py-2.5 bg-white hover:bg-[#fff5f3] text-[#c1443c] font-semibold rounded-md border border-[#c1443c] transition-colors"
         >
           Start Quiz
         </button>
@@ -96,7 +92,7 @@ function QuizSection({ quiz, onAskTutor }) {
         <div className="flex flex-col sm:flex-row justify-center gap-4">
           <button
             onClick={handleReset}
-            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors border border-slate-700 hover:border-slate-600"
+            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-white hover:bg-slate-50 text-[#111] font-medium rounded-lg transition-colors border-2 border-[#111] hover:border-[#c1443c]"
           >
             <RotateCcw className="w-4 h-4" />
             Review Answers
@@ -177,7 +173,7 @@ function QuizSection({ quiz, onAskTutor }) {
           <button
             onClick={handleSubmit}
             disabled={!selectedOption}
-            className="w-full py-3 bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 disabled:text-slate-500 text-white font-semibold rounded-lg transition-all"
+            className="quiz-submit-button w-full py-3 bg-purple-600 disabled:bg-slate-800 disabled:text-slate-500 text-white font-semibold rounded-lg transition-colors"
           >
             Submit Answer
           </button>
@@ -197,7 +193,7 @@ function QuizSection({ quiz, onAskTutor }) {
             </div>
             <button
               onClick={handleNext}
-              className="w-full py-3 flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg transition-all border border-slate-700 hover:border-slate-600"
+              className="w-full py-3 flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-[#111] font-semibold rounded-lg transition-colors border-2 border-[#111] hover:border-[#c1443c]"
             >
               {currentQIndex < quiz.length - 1
                 ? "Next question"
