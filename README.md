@@ -4,13 +4,14 @@
 
 **Turn lectures into searchable knowledge.**
 
-StudyStream fetches available YouTube captions without downloading the video. It processes transcripts through a local RAG pipeline — chunking, embedding, and indexing — then answers questions using transcript-retrieved context and provides clickable timestamp citations to the retrieved source chunks. All powered by a Node.js-first architecture.
+StudyStream fetches available YouTube captions without downloading the video. It processes transcripts through a local RAG pipeline - chunking, embedding, and indexing - then answers questions using transcript-retrieved context and provides clickable timestamp citations to the retrieved source chunks. All powered by a Node.js-first architecture.
 
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-Vite-61DAFB?logo=react&logoColor=black)](https://reactjs.org/)
 [![Mistral AI](https://img.shields.io/badge/Mistral%20AI-LLM-FF7000?logo=mistral&logoColor=white)](https://mistral.ai/)
 [![Transformers.js](https://img.shields.io/badge/Transformers.js-Local%20Embeddings-FFD21E?logo=huggingface&logoColor=black)](https://huggingface.co/docs/transformers.js/index)
 [![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector%20Store-FF6F61)](https://www.trychroma.com/)
+
 </div>
 
 ---
@@ -25,16 +26,16 @@ Give StudyStream a YouTube link. It will:
 4. **Index** the embeddings into a local ChromaDB vector store.
 5. **Summarize** the video (Title, Summary, Key Concepts, Takeaways).
 6. **Generate a Quiz** (5 multiple-choice questions based on the video context).
-7. **Answer your questions** using transcript-retrieved context — with clickable timestamp citations linking directly to the relevant lecture segment.
+7. **Answer your questions** using transcript-retrieved context - with clickable timestamp citations linking directly to the relevant lecture segment.
 
 The interactive dashboard provides:
 
-- **Real-time SSE processing** — a live pipeline view (Fetch → Chunk → Embed → Index → Summarize)
-- **AI-generated summary** — title, paragraph summary, key concept pills, and key takeaways
-- **Interactive quiz** — one-question-at-a-time card flow with explanations and score tracking
-- **AI Tutor** — a RAG-powered chat sidebar grounded in the transcript
-- **Timestamp source cards** — every answer cites the exact transcript segments with links that jump to that position in the video
-- **Latency observability** — per-query breakdown of embedding, retrieval, and LLM generation time
+- **Real-time SSE processing** - a live pipeline view (Fetch → Chunk → Embed → Index → Summarize)
+- **AI-generated summary** - title, paragraph summary, key concept pills, and key takeaways
+- **Interactive quiz** - one-question-at-a-time card flow with explanations and score tracking
+- **AI Tutor** - a RAG-powered chat sidebar grounded in the transcript
+- **Timestamp source cards** - every answer cites the exact transcript segments with links that jump to that position in the video
+- **Latency observability** - per-query breakdown of embedding, retrieval, and LLM generation time
 
 ---
 
@@ -101,6 +102,7 @@ The interactive dashboard provides:
 ```
 
 **Independent Generation Tasks:**
+
 ```
 Transcript
     ├──→ Summary
@@ -108,20 +110,20 @@ Transcript
     └──→ Quiz
 ```
 
-*Note the core distinction in RAG: **ChromaDB retrieves** the relevant chunks, while **Mistral generates** the final grounded answer. Timestamps in source citations come directly from chunk metadata — not from the LLM.*
+_Note the core distinction in RAG: **ChromaDB retrieves** the relevant chunks, while **Mistral generates** the final grounded answer. Timestamps in source citations come directly from chunk metadata - not from the LLM._
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Tech |
-|---|---|
-| Application API | [Node.js](https://nodejs.org/) + [Express.js](https://expressjs.com/) (REST + SSE) |
-| Frontend | [React](https://reactjs.org/) + [Vite](https://vitejs.dev/) + Tailwind CSS |
-| Embeddings | [@xenova/transformers](https://huggingface.co/docs/transformers.js) (`all-MiniLM-L6-v2` local) |
-| Vector Store | [ChromaDB](https://www.trychroma.com/) (`chromadb` npm) |
-| Transcription | `youtube-transcript` npm (Fetches available YouTube captions) |
-| LLM | [Mistral AI](https://mistral.ai/) (Configurable via `LLM_MODEL` env var) |
+| Layer           | Tech                                                                                           |
+| --------------- | ---------------------------------------------------------------------------------------------- |
+| Application API | [Node.js](https://nodejs.org/) + [Express.js](https://expressjs.com/) (REST + SSE)             |
+| Frontend        | [React](https://reactjs.org/) + [Vite](https://vitejs.dev/) + Tailwind CSS                     |
+| Embeddings      | [@xenova/transformers](https://huggingface.co/docs/transformers.js) (`all-MiniLM-L6-v2` local) |
+| Vector Store    | [ChromaDB](https://www.trychroma.com/) (`chromadb` npm)                                        |
+| Transcription   | `youtube-transcript` npm (Fetches available YouTube captions)                                  |
+| LLM             | [Mistral AI](https://mistral.ai/) (Configurable via `LLM_MODEL` env var)                       |
 
 ---
 
@@ -131,7 +133,7 @@ Transcript
 StudyStream/
 ├── frontend/                    # React SPA (Vite + Tailwind CSS)
 │   ├── src/
-│   │   ├── App.jsx              # State orchestrator — SSE, routing, history
+│   │   ├── App.jsx              # State orchestrator - SSE, routing, history
 │   │   ├── index.css            # Dark theme, glassmorphism utilities, animations
 │   │   └── components/
 │   │       ├── Header.jsx           # Logo + New Analysis button
@@ -166,7 +168,7 @@ StudyStream/
 
 ## 🧠 Important Design Decisions
 
-1. **Node.js-First Architecture**: The application backend is implemented entirely in Node.js. Transformers.js enables local embedding generation within the JavaScript runtime, eliminating the need for a separate Python inference service. ChromaDB runs as a separate local process, but every application-layer concern — transcription, chunking, embedding, RAG orchestration, and LLM calls — lives within a single Node.js service.
+1. **Node.js-First Architecture**: The application backend is implemented entirely in Node.js. Transformers.js enables local embedding generation within the JavaScript runtime, eliminating the need for a separate Python inference service. ChromaDB runs as a separate local process, but every application-layer concern - transcription, chunking, embedding, RAG orchestration, and LLM calls - lives within a single Node.js service.
 2. **Skipping Local Whisper**: For the MVP, the system uses available YouTube captions instead of downloading and transcribing the video locally, significantly reducing processing time and infrastructure requirements.
 3. **Preserved Timestamps & Data Isolation**: Each transcript chunk is stored with its `videoId`. Retrieval filters by the current video, and the backend validates the returned metadata before passing chunks to the LLM. Clickable timestamps are returned directly from the metadata, bypassing LLM citation generation.
    ```json
@@ -185,35 +187,45 @@ StudyStream/
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js v18+
 - [ChromaDB running locally](https://docs.trychroma.com/getting-started) (e.g., via Docker: `docker run -p 8000:8000 chromadb/chroma`)
 - A [Mistral AI API Key](https://console.mistral.ai/)
 
 ### 1. Backend Setup
+
 ```bash
 cd StudyStream/server
 npm install
 ```
+
 Rename `.env.example` to `.env` and add your keys:
+
 ```env
 PORT=5000
 CHROMA_URL=http://localhost:8000
 LLM_API_KEY=your_mistral_api_key
 ```
+
 Start the server:
+
 ```bash
 npm run dev
 ```
 
 ### 2. Frontend Setup
+
 ```bash
 cd StudyStream/frontend
 npm install
 ```
+
 Start the frontend:
+
 ```bash
 npm run dev
 ```
+
 Open the provided `localhost` URL in your browser.
 
 ---
@@ -224,8 +236,8 @@ StudyStream includes a custom retrieval evaluation set containing 30 transcript-
 
 Each question is embedded using the same local `all-MiniLM-L6-v2` embedding model used by the application. The evaluator checks whether a relevant transcript chunk appears within the top-K ChromaDB retrieval results.
 
-| Metric | Result |
-|---|---:|
+| Metric   | Result |
+| -------- | -----: |
 | Recall@1 | 46.67% |
 | Recall@3 | 66.67% |
 | Recall@5 | 70.00% |
@@ -233,19 +245,23 @@ Each question is embedded using the same local `all-MiniLM-L6-v2` embedding mode
 These results represent retrieval recall on the current 30-question evaluation set, rather than end-to-end answer accuracy.
 
 To run the evaluation, use:
+
 ```bash
 node evaluation/evaluate.js <videoId>
 ```
-*(Requires ChromaDB to be running and a video to be processed/indexed first).*
+
+_(Requires ChromaDB to be running and a video to be processed/indexed first)._
 
 ### Evaluation Method
 
 Each evaluation question contains:
+
 - a natural-language question
 - an expected concept
 - an approximate transcript timestamp
 
 The evaluator:
+
 1. Generates an embedding for the question.
 2. Performs a top-5 similarity search in ChromaDB.
 3. Checks whether a retrieved chunk matches the expected concept.

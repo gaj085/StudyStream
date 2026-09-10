@@ -71,7 +71,8 @@ function App() {
     }
   };
 
-  // --- SSE subscription whenever jobId changes ---
+  // Keep exactly one progress stream per job. Closing the previous stream is
+  // important when a user starts a new analysis before the old one finishes.
   useEffect(() => {
     if (!jobId) return;
 
@@ -92,6 +93,8 @@ function App() {
         if (data.status === "ready") {
           const vid = data.result?.videoId;
           setVideoId(vid);
+          // The SSE payload only confirms completion and supplies the ID;
+          // summary and quiz are exposed by their own resource endpoints.
           fetchSummaryAndQuiz(vid);
           es.close();
         }
@@ -124,14 +127,14 @@ function App() {
       ]);
       setSummary(summaryRes.data);
 
-      // Normalize quiz: handle both array and object wrapping
+      // Accept the response shapes used by the API and older stored results.
       const raw = quizRes.data;
       if (Array.isArray(raw)) setQuiz(raw);
       else if (raw.questions) setQuiz(raw.questions);
       else if (raw.quiz) setQuiz(raw.quiz);
       else setQuiz([]);
 
-      // Save to localStorage history
+      // Keep history client-side, deduplicated by URL, and capped at five items.
       saveToHistory(videoUrl, vid, summaryRes.data?.title);
     } catch (err) {
       console.error("Failed to fetch summary/quiz:", err);
@@ -244,7 +247,7 @@ function App() {
           </div>
         </div>
 
-        {/* AI Tutor Sidebar — only show when a video is ready */}
+        {/* AI Tutor Sidebar - only show when a video is ready */}
         {isReady && tutorOpen && (
           <div className="hidden lg:block w-96 shrink-0 sticky top-0 h-screen py-4 pr-4">
             <AITutor
@@ -259,7 +262,7 @@ function App() {
         )}
       </div>
 
-      {/* Mobile AI Tutor Drawer — shown only below lg breakpoint */}
+      {/* Mobile AI Tutor Drawer - shown only below lg breakpoint */}
       <div className="lg:hidden">
         {isReady && (
           <AITutor

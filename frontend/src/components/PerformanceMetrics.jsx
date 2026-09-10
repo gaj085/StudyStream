@@ -6,7 +6,7 @@ function PerformanceMetrics({ latency }) {
   if (!latency) return null;
 
   const formatMs = (ms) => {
-    if (!ms && ms !== 0) return "—";
+    if (!ms && ms !== 0) return "-";
     if (ms >= 1000) return `${(ms / 1000).toFixed(2)}s`;
     return `${ms}ms`;
   };

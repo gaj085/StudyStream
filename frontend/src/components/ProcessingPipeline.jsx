@@ -10,7 +10,8 @@ import {
 } from "lucide-react";
 
 function ProcessingPipeline({ status, progress, message }) {
-  // Define the stages
+  // These thresholds provide a visual fallback when a progress event arrives
+  // before its matching stage status, which can happen over SSE.
   const stages = [
     {
       id: "transcribing",
@@ -49,11 +50,12 @@ function ProcessingPipeline({ status, progress, message }) {
     },
   ];
 
-  // Helper to determine stage status
+  // Prefer the explicit backend stage, then use progress to avoid a stalled
+  // looking pipeline while events are in flight.
   const getStageStatus = (stage, currentStatus, currentProgress) => {
     if (currentStatus === "error") return "pending";
 
-    // Find stage index and current active stage index
+    // Stage ordering lets us mark earlier stages complete automatically.
     const stageIdx = stages.findIndex((s) => s.id === stage.id);
 
     // If progress is 100 or ready, all are complete

@@ -68,7 +68,7 @@ async function deleteChunks(videoId) {
     console.log(`[ChromaDB] Deleted existing chunks for videoId=${videoId}`);
   } catch (error) {
     // Non-fatal: if the collection has no matching docs, Chroma may throw.
-    // We log and continue — the upsert will handle the rest.
+    // We log and continue - the upsert will handle the rest.
     console.warn(
       `[ChromaDB] deleteChunks warning (may be empty) for videoId=${videoId}:`,
       error.message,

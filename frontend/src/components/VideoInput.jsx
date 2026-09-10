@@ -119,7 +119,7 @@ function VideoInput({ onAnalyze, isLoading }) {
         </div>
         <p className="text-sm leading-7 text-slate-700">
           &quot;...the second law tells us that{" "}
-          <mark>entropy of an isolated system never decreases</mark> — this is
+          <mark>entropy of an isolated system never decreases</mark> - this is
           the direction time appears to flow in...&quot;
         </p>
         <p className="mt-4 text-xs text-rose-700 font-medium">
