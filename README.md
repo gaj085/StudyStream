@@ -4,19 +4,19 @@
 
 **Turn lectures into searchable knowledge.**
 
-StudyStream fetches available YouTube captions without downloading the video. It processes transcripts through a local RAG pipeline - chunking, embedding, and indexing - then answers questions using transcript-retrieved context and provides clickable timestamp citations to the retrieved source chunks. All powered by a Node.js-first architecture.
-
-## Demo
-
-[![StudyStream Demo](video_demo/studystream-demo.png)](video_demo/studystream_preview.mp4)
-
-Click the preview to watch the demo video.
+StudyStream fetches available YouTube captions without downloading the video. It processes transcripts through a Node.js RAG pipeline - chunking, embedding, and indexing - then answers questions using transcript-retrieved context and provides clickable timestamp citations to the retrieved source chunks. All powered by a Node.js-first architecture.
 
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-Vite-61DAFB?logo=react&logoColor=black)](https://reactjs.org/)
 [![Mistral AI](https://img.shields.io/badge/Mistral%20AI-LLM-FF7000?logo=mistral&logoColor=white)](https://mistral.ai/)
 [![Transformers.js](https://img.shields.io/badge/Transformers.js-Local%20Embeddings-FFD21E?logo=huggingface&logoColor=black)](https://huggingface.co/docs/transformers.js/index)
 [![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector%20Store-FF6F61)](https://www.trychroma.com/)
+
+## Demo
+
+[![StudyStream Demo](assets/studystream-demo.png)](https://drive.google.com/file/d/1_0CrzMUU9j1g_Kh_aSq7Dk_YvS5Vd2yl/view)
+
+Click the preview to watch the demo video.
 
 </div>
 
@@ -137,6 +137,8 @@ _Note the core distinction in RAG: **ChromaDB retrieves** the relevant chunks, w
 
 ```
 StudyStream/
+├── assets/                     # README demo thumbnail
+│   └── studystream-demo.png
 ├── frontend/                    # React SPA (Vite + Tailwind CSS)
 │   ├── src/
 │   │   ├── App.jsx              # State orchestrator - SSE, routing, history
