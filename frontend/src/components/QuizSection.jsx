@@ -103,7 +103,7 @@ function QuizSection({ quiz, onAskTutor }) {
                 "I need help understanding some concepts from the quiz.",
               )
             }
-            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-blue-500/20"
+            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-white hover:bg-[#fff5f3] text-[#c1443c] font-semibold rounded-lg border-2 border-[#c1443c] transition-all duration-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c1443c]/40"
           >
             <MessageSquare className="w-4 h-4" />
             Ask Tutor

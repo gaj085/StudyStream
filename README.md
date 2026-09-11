@@ -6,6 +6,8 @@
 
 StudyStream fetches available YouTube captions without downloading the video. It processes transcripts through a local RAG pipeline - chunking, embedding, and indexing - then answers questions using transcript-retrieved context and provides clickable timestamp citations to the retrieved source chunks. All powered by a Node.js-first architecture.
 
+[Watch the StudyStream demo](video_demo/studystream_preview.mp4)
+
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-Vite-61DAFB?logo=react&logoColor=black)](https://reactjs.org/)
 [![Mistral AI](https://img.shields.io/badge/Mistral%20AI-LLM-FF7000?logo=mistral&logoColor=white)](https://mistral.ai/)
@@ -23,7 +25,7 @@ Give StudyStream a YouTube link. It will:
 1. **Extract**: Fetches available YouTube captions without downloading the video.
 2. **Chunk**: Splits the text while preserving the `startTime` and `endTime` metadata.
 3. **Embed** the chunks locally using HuggingFace's `all-MiniLM-L6-v2` directly inside Node.js (384-dimensional vectors).
-4. **Index** the embeddings into a local ChromaDB vector store.
+4. **Index** the embeddings into ChromaDB.
 5. **Summarize** the video (Title, Summary, Key Concepts, Takeaways).
 6. **Generate a Quiz** (5 multiple-choice questions based on the video context).
 7. **Answer your questions** using transcript-retrieved context - with clickable timestamp citations linking directly to the relevant lecture segment.
@@ -31,7 +33,7 @@ Give StudyStream a YouTube link. It will:
 The interactive dashboard provides:
 
 - **Real-time SSE processing** - a live pipeline view (Fetch → Chunk → Embed → Index → Summarize)
-- **AI-generated summary** - title, paragraph summary, key concept pills, and key takeaways
+- **AI-generated summary** - title, paragraph summary, key concepts, and key takeaways
 - **Interactive quiz** - one-question-at-a-time card flow with explanations and score tracking
 - **AI Tutor** - a RAG-powered chat sidebar grounded in the transcript
 - **Timestamp source cards** - every answer cites the exact transcript segments with links that jump to that position in the video
@@ -122,7 +124,7 @@ _Note the core distinction in RAG: **ChromaDB retrieves** the relevant chunks, w
 | Frontend        | [React](https://reactjs.org/) + [Vite](https://vitejs.dev/) + Tailwind CSS                     |
 | Embeddings      | [@xenova/transformers](https://huggingface.co/docs/transformers.js) (`all-MiniLM-L6-v2` local) |
 | Vector Store    | [ChromaDB](https://www.trychroma.com/) (`chromadb` npm)                                        |
-| Transcription   | `youtube-transcript` npm (Fetches available YouTube captions)                                  |
+| Transcription   | TranscriptAPI (Fetches available YouTube captions)                                             |
 | LLM             | [Mistral AI](https://mistral.ai/) (Configurable via `LLM_MODEL` env var)                       |
 
 ---
@@ -136,10 +138,10 @@ StudyStream/
 │   │   ├── App.jsx              # State orchestrator - SSE, routing, history
 │   │   ├── index.css            # Dark theme, glassmorphism utilities, animations
 │   │   └── components/
-│   │       ├── Header.jsx           # Logo + New Analysis button
+│   │       ├── Header.jsx           # Logo + New Lecture button
 │   │       ├── VideoInput.jsx       # URL input + localStorage history
 │   │       ├── ProcessingPipeline.jsx # SSE progress dashboard with stage indicators
-│   │       ├── SummarySection.jsx   # Title, summary, concept pills, takeaways
+│   │       ├── SummarySection.jsx   # Title, summary, key concepts, takeaways
 │   │       ├── QuizSection.jsx      # Card-based interactive quiz UI
 │   │       ├── AITutor.jsx          # RAG chat sidebar + timestamp source cards
 │   │       └── PerformanceMetrics.jsx # Collapsible latency tray per query
@@ -148,12 +150,12 @@ StudyStream/
 │   ├── src/
 │   │   ├── controllers/         # Route logic (video, chat, summary, quiz)
 │   │   ├── services/            # Core business logic
-│   │   │   ├── transcription.service.js # youtube-transcript
+│   │   │   ├── transcription.service.js # TranscriptAPI client
 │   │   │   ├── chunking.service.js      # preserve timestamps
 │   │   │   ├── embedding.service.js     # Transformers.js
 │   │   │   ├── rag.service.js           # Similarity + LLM orchestration
 │   │   │   ├── llm.service.js           # Mistral API calls
-│   │   │   └── job.service.js           # Background job state
+│   │   │   └── job.service.js           # In-memory background job state
 │   │   ├── clients/
 │   │   │   └── chroma.client.js         # ChromaDB interface
 │   │   ├── routes/              # Express routers
@@ -168,12 +170,12 @@ StudyStream/
 
 ## 🧠 Important Design Decisions
 
-1. **Node.js-First Architecture**: The application backend is implemented entirely in Node.js. Transformers.js enables local embedding generation within the JavaScript runtime, eliminating the need for a separate Python inference service. ChromaDB runs as a separate local process, but every application-layer concern - transcription, chunking, embedding, RAG orchestration, and LLM calls - lives within a single Node.js service.
+1. **Node.js-First Architecture**: The application backend is implemented entirely in Node.js. Transformers.js enables local embedding generation within the JavaScript runtime, eliminating the need for a separate Python inference service. ChromaDB can run locally or through Chroma Cloud, while every application-layer concern - transcription, chunking, embedding, RAG orchestration, and LLM calls - lives within a single Node.js service.
 2. **Skipping Local Whisper**: For the MVP, the system uses available YouTube captions instead of downloading and transcribing the video locally, significantly reducing processing time and infrastructure requirements.
 3. **Preserved Timestamps & Data Isolation**: Each transcript chunk is stored with its `videoId`. Retrieval filters by the current video, and the backend validates the returned metadata before passing chunks to the LLM. Clickable timestamps are returned directly from the metadata, bypassing LLM citation generation.
    ```json
    {
-     "videoId": "dQw4w9WgXcQ",
+     "videoId": "sha256(normalized-youtube-url)",
      "chunkIndex": 17,
      "startTime": 742.3,
      "endTime": 768.1
@@ -181,6 +183,7 @@ StudyStream/
    ```
 4. **Asynchronous Jobs & SSE**: Video processing can take time. Instead of blocking the HTTP request, the backend creates a job ID and streams progress back to the React frontend using Server-Sent Events (SSE).
 5. **Latency Tracking**: Tracks component-level and end-to-end latency for embedding generation, vector retrieval, and LLM generation.
+6. **In-Memory URL Cache**: A normalized YouTube URL is used as the key for a process-local `Map`, allowing repeated analyses to reuse the processed transcript, summary, quiz, and chunks while the server remains running.
 
 ---
 
@@ -189,8 +192,9 @@ StudyStream/
 ### Prerequisites
 
 - Node.js v18+
-- [ChromaDB running locally](https://docs.trychroma.com/getting-started) (e.g., via Docker: `docker run -p 8000:8000 chromadb/chroma`)
+- ChromaDB locally via Docker, or a Chroma Cloud database
 - A [Mistral AI API Key](https://console.mistral.ai/)
+- A TranscriptAPI key
 
 ### 1. Backend Setup
 
@@ -199,13 +203,22 @@ cd StudyStream/server
 npm install
 ```
 
-Rename `.env.example` to `.env` and add your keys:
+Copy `.env.example` to `.env` and add your keys. For local ChromaDB, leave `CHROMA_API_KEY` empty and set `CHROMA_URL`; for Chroma Cloud, set `CHROMA_API_KEY`, `CHROMA_TENANT`, and `CHROMA_DATABASE`:
 
 ```env
 PORT=5000
-CHROMA_URL=http://localhost:8000
+CHROMA_URL=http://localhost:8000 # local mode only
+CHROMA_API_KEY=                 # Cloud mode only
+CHROMA_TENANT=                  # Cloud mode only
+CHROMA_DATABASE=StudyStream      # Cloud mode only
 LLM_API_KEY=your_mistral_api_key
+LLM_MODEL=open-mistral-nemo
+TRANSCRIPT_API_KEY=your_transcript_api_key
+CORS_ORIGIN=http://localhost:5173
+RAG_DISTANCE_THRESHOLD=1.5
 ```
+
+For a Vercel frontend and Render backend, set `VITE_API_BASE_URL` in Vercel to the deployed backend URL ending in `/api`, and set `CORS_ORIGIN` in Render to the deployed Vercel origin.
 
 Start the server:
 
@@ -276,7 +289,8 @@ This provides a lightweight, reproducible retrieval benchmark for the current MV
 
 - **Caption Dependency**: Videos without available captions are not currently supported. A future version could fall back to Whisper or a transcription API when YouTube captions are unavailable.
 - **Character-based Chunking**: Chunks are split based on raw character count rather than semantic sentence or paragraph boundaries.
-- **Ephemeral Job State**: Job status and processing metadata are maintained in memory. This keeps the MVP lightweight but means state is lost when the server restarts.
+- **Ephemeral Job and Cache State**: Job status, processed video metadata, summaries, quizzes, and the normalized-URL `Map` cache are maintained in memory. This keeps the single-user MVP lightweight but means state is lost when the server restarts or a hosting instance is recycled.
+- **Long-video generation window**: Transcript chunking covers the fetched transcript, but summary and quiz generation currently use only the first 100 transcript segments to stay within LLM token limits. Chat retrieval can still search indexed chunks from the full transcript.
 - **Stateless Chat**: The current RAG pipeline is stateless. It does not inject previous conversation turns into the retrieval and generation context.
 - **Uncalibrated Threshold**: The relevance distance threshold (`RAG_DISTANCE_THRESHOLD`) is a heuristic value and is not dynamically calibrated across different subjects.
 - **Evaluation Scope**: The current evaluation measures retrieval recall using a 30-question custom dataset. End-to-end answer quality is not currently measured.
