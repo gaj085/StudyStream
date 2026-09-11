@@ -6,12 +6,11 @@
 
 StudyStream fetches available YouTube captions without downloading the video. It processes transcripts through a local RAG pipeline - chunking, embedding, and indexing - then answers questions using transcript-retrieved context and provides clickable timestamp citations to the retrieved source chunks. All powered by a Node.js-first architecture.
 
-<video controls width="720">
-       <source src="https://raw.githubusercontent.com/gaj085/StudyStream/main/video_demo/studystream_preview.mp4" type="video/mp4" />
-       Your browser does not support the video tag.
-</video>
+## Demo
 
-[Open the StudyStream demo video](video_demo/studystream_preview.mp4)
+[![StudyStream Demo](video_demo/studystream-demo.png)](video_demo/studystream_preview.mp4)
+
+Click the preview to watch the demo video.
 
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-Vite-61DAFB?logo=react&logoColor=black)](https://reactjs.org/)
